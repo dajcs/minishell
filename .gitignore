@@ -1,0 +1,15 @@
+# Executables
+minishell
+*.out
+a.out
+
+# Object files
+*.o
+*.a
+
+# Dependency files
+*.d
+
+# Editor/OS files
+.DS_Store
+*.swp
