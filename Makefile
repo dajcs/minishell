@@ -6,7 +6,7 @@
 #    By: anemet <anemet@student.42luxembourg.lu>    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/08/01 14:10:19 by anemet            #+#    #+#              #
-#    Updated: 2025/08/01 14:21:40 by anemet           ###   ########.fr        #
+#    Updated: 2025/08/01 17:16:16 by anemet           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -17,36 +17,48 @@ NAME = minishell
 CC = cc
 CFLAGS = -Wall -Wextra -Werror -g
 
-# Include path for headers (readline.h: `dpkg -L libreadline-dev`)
-CPPFLAGS = -I./include -I/usr/include/readline/
-
 # Source files
 SRCS = src/main.c \
        src/parsing/tokenizer.c
 
 # Object files
-OBSJ = $(SRCS:.c=.o)
+OBJS = $(SRCS:.c=.o)
 
-# Linker flags for readline
-LDFLAGS = -L/usr/lib/x86_64-linux-gnu/libreadline.a
-LDLIBS = -lreadline
+# --- Libraries ---
+LIBFT_DIR = libft
+LIBFT = $(LIBFT_DIR)/libft.a
+
+# Include path for headers (readline.h: `dpkg -L libreadline-dev`)
+# -I/usr/include/readline/ is not needed, /usr/include searched by default
+INCLUDES = -I./include -Ilibft
+
+# Linker flags for readline & libft
+LDFLAGS = -L/usr/lib/x86_64-linux-gnu -L$(LIBFT_DIR)
+# Some systems might need -lncurses, others -ltinfo as well
+LDLIBS = -lreadline -lncurses -lft
 
 # ------- Rules ----------
 
 all: $(NAME)
 
-$(NAME): $(OBJS)
-	$(CC) $(LDFLAGS) $(OBJS) $(LDLIBS) -o $(NAME)
+$(NAME): $(OBJS) $(LIBFT)
+	$(CC) $(CFLAGS) $(INCLUDES) $(LDFLAGS) $(OBJS) $(LDLIBS) -o $(NAME)
+
+# Build the libft whenever needed
+$(LIBFT):
+	@$(MAKE) -C $(LIBFT_DIR)
 
 # Rule to compile .c files into .o files
 %.o: %.c
-	$(CC) $(CFLAGS) $(CPPFLAGS) -c $< -o $@
+	$(CC) $(CFLAGS) $(INCLUDES) -c $< -o $@
 
 clean:
-	rm -f $(OBSJ)
+	rm -f $(OBJS)
+	@$(MAKE) -C $(LIBFT_DIR) clean
 
 fclean: clean
 	rm -f $(NAME)
+	@$(MAKE) -C $(LIBFT_DIR) fclean
 
 re: fclean all
 

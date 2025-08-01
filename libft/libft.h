@@ -6,7 +6,7 @@
 /*   By: anemet <anemet@student.42luxembourg.lu>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/06 11:22:10 by anemet            #+#    #+#             */
-/*   Updated: 2025/07/17 13:02:27 by anemet           ###   ########.fr       */
+/*   Updated: 2025/08/01 15:25:29 by anemet           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,6 +32,7 @@ typedef struct s_list
 	struct s_list	*next;
 }					t_list;
 
+int					is_space(char c);
 int					min(int a, int b);
 int					max(int a, int b);
 float				minf(float a, float b);
