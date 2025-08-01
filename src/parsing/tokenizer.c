@@ -6,7 +6,7 @@
 /*   By: anemet <anemet@student.42luxembourg.lu>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/01 15:09:07 by anemet            #+#    #+#             */
-/*   Updated: 2025/08/01 17:17:28 by anemet           ###   ########.fr       */
+/*   Updated: 2025/08/01 19:59:21 by anemet           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,7 @@
 
 // A helper to check for metacharacters
 // Returns the length of the metacharacter (1 or 2) or 0 if not metacharacter
-int is_metachar(const char *s)
+static int is_metachar(const char *s)
 {
 	if (*s == '|')
 		return 1;
@@ -38,37 +38,95 @@ int is_metachar(const char *s)
 	}
 	return 0;
 }
-
-// for now a SIMPLIFIED tokenizer stub
-/* --- The REAL tokenizer
-  1. COUNT TOKENS:
+/* COUNT TOKENS:
     - loop through input
 	- skip spaces
-	- if metachar: increment token count and advance idx by 1 or 2
-	- if regular character, this is the start of a word
-	- increment token count and advance until space or metacharacter
-  2. ALLOCATE MEMORY
-    - char **tokens = malloc(sizeof(char *) * (token_count + 1));
-	- NULL-terminate the array: tokens[token_count] = NULL;
-  3. POPULATE ARRAY:
-    - loop through input again
+	- if something: increment token count
+	- if metachar: advance i by 1 or 2
+	- if regular character: advance until space or metacharacter
+	- return count                                                  */
+static int count_tokens(const char *s)
+{
+	int i;
+	int meta;
+	int count;
+
+	i = 0;
+	count = 0;
+	while (s && s[i])
+	{
+		while (s[i] && is_space(s[i]))
+			i++;
+		if (s[i])
+			count++;
+		meta = is_metachar(s + i);
+		if (meta)
+			i += meta;
+		else
+			while(s[i] && !is_space(s[i]) && !is_metachar(s + i))
+				i++;
+	}
+	return count;
+}
+
+/* Extract Tokens:
 	- skip spaces
-	- if metachar extract it (e.g., using ft_substr)
-	- store it in the `tokens` array, and advance.
-	- if it's a word, extract it, store it and advance
-*/
+	- if metachar extract it using ft_substr), advance *i
+	- if it's a word, extract it, store it and advance *i
+	- if storage OK, return token, otherwise return NULL       */
+static char *extract_tokens(const char *s, int *i)
+{
+	int j;
+	int meta;
+	char *token;
+
+	while (s[*i] && is_space(s[*i]))
+		(*i)++;
+	meta = is_metachar(s + *i);
+	if (meta)
+	{
+		token = ft_substr(s, *i, meta);
+		*i += meta;
+	}
+	else
+	{
+		j = 0;
+		while (s[*i + j] && !is_space(s[*i + j]) && !is_metachar(s + *i + j))
+			j++;
+		token = ft_substr(s, *i, j);
+		*i += j;
+	}
+	if (!token)
+		return NULL;
+	return token;
+}
+
+
+/*   Tokenizer steps:
+  1. count_tokens(input)
+  2. allocate memory for char **tokens: nr_tokens + 1 for terminating NULL
+  3. populate array: *extract_tokens
+  4. Return **tokens;                                                   */
 char **tokenize(const char *input)
 {
-	char **tokens = malloc(sizeof(char *) * 4);
+	int i;
+	int tok;
+	int nr_tokens;
+
+	nr_tokens = count_tokens(input);
+	char **tokens = malloc(sizeof(char *) * (nr_tokens + 1));
 	if (!tokens)
 		return NULL;
-	tokens[0] = ft_strdup("ls");
-	tokens[1] = ft_strdup("-l");
-	tokens[2] = ft_strdup("|");
-	tokens[3] = ft_strdup("wc");
-	tokens[4] = ft_strdup("-l");
-	tokens[4] = NULL;
-	(void)input;
+	i = 0;
+	tok = 0;
+	while (tok < nr_tokens)
+	{
+		tokens[tok] = extract_tokens(input, &i);
+		if (!tokens[tok])
+			return NULL;
+		tok++;
+	}
+	tokens[tok] = NULL;
 	return tokens;
 }
 
