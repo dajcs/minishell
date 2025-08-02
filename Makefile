@@ -6,7 +6,7 @@
 #    By: anemet <anemet@student.42luxembourg.lu>    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/08/01 14:10:19 by anemet            #+#    #+#              #
-#    Updated: 2025/08/01 20:00:37 by anemet           ###   ########.fr        #
+#    Updated: 2025/08/02 10:23:26 by anemet           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -19,7 +19,8 @@ CFLAGS = -Wall -Wextra -Werror -g
 
 # Source files
 SRCS = src/main.c \
-       src/parsing/tokenizer.c
+       src/parsing/tokenizer.c \
+       src/parsing/parser.c
 
 # Object files
 OBJS = $(SRCS:.c=.o)

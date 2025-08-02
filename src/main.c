@@ -6,12 +6,13 @@
 /*   By: anemet <anemet@student.42luxembourg.lu>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/01 14:34:51 by anemet            #+#    #+#             */
-/*   Updated: 2025/08/01 15:11:58 by anemet           ###   ########.fr       */
+/*   Updated: 2025/08/02 11:12:47 by anemet           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
+/*
 void	check_tokens(t_shell shell_data)
 {
 	int	i;
@@ -23,20 +24,47 @@ void	check_tokens(t_shell shell_data)
 		i++;
 	}
 }
+*/
+
+// --- Helper function for testing ---
+void	print_command(t_command *cmd)
+{
+	int	i;
+
+	if (!cmd)
+		return ;
+	printf("--- Command ---\n");
+	printf("Command: \"%s\"\n", cmd->command);
+	printf("Arguments:\n");
+	if (cmd->arguments)
+	{
+		i = 0;
+		while (cmd->arguments[i])
+		{
+			printf("  [%d]: \"%s\"\n", i, cmd->arguments[i]);
+			i++;
+		}
+	}
+	printf("Input FD: %d\n", cmd->input_fd);
+	printf("Output FD: %d\n", cmd->output_fd);
+	printf("Next command: %p\n", cmd->next);
+	printf("------------------\n");
+}
 
 // The main loop of the shell
 /*
   1. Read input using readline
-  2. Handle Ctrl-D (readline returns NULL)
+  2. Handle Ctrl-D (readline returns NULL -> exit())
   3. Add to history if the line is not empty
   4. Tokenize the input line
-  --- Testing ---
-  5. Print the tokens to verify they are correct
-  6. Free memory for the next loop iteration
+  5. Parse tokens into a command structure
+  5. Print the content of the parsed command structure
+  6. Free all allocated memory for this cycle
 */
 void	shell_loop(void)
 {
 	char	*line;
+	char	**tokens;
 	t_shell	shell_data;
 
 	while (1)
@@ -49,12 +77,17 @@ void	shell_loop(void)
 		}
 		if (line && *line)
 			add_history(line);
-		shell_data.tokens = tokenize(line);
-		if (shell_data.tokens)
-			check_tokens(shell_data);
+		tokens = tokenize(line);
+		if (tokens)
+			shell_data.commands = parse(tokens);
+		else
+			shell_data.commands = NULL;
+		print_command(shell_data.commands);
 		free(line);
-		if (shell_data.tokens)
-			free_tokens(shell_data.tokens);
+		if (tokens)
+			free_tokens(tokens);
+		if (shell_data.commands)
+			free_command_list(shell_data.commands);
 	}
 }
 
