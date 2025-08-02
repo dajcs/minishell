@@ -6,50 +6,30 @@
 /*   By: anemet <anemet@student.42luxembourg.lu>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/01 15:09:07 by anemet            #+#    #+#             */
-/*   Updated: 2025/08/02 11:20:13 by anemet           ###   ########.fr       */
+/*   Updated: 2025/08/02 19:31:51 by anemet           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "libft.h"
 #include "minishell.h"
 
 /*
-  task : handle spaces and recognize metacharacters
+  task : handle spaces and recognize metacharacters and quotations
   e.g.,: `ls|wc` should be ["ls", "|", "wc"], not ["ls|wc"]
 */
 
-// A helper to check for metacharacters
-// Returns the length of the metacharacter (1 or 2) or 0 if not metacharacter
-static int	is_metachar(const char *s)
-{
-	if (*s == '|')
-		return (1);
-	if (*s == '<')
-	{
-		if (*(s + 1) == '<')
-			return (2);
-		return (1);
-	}
-	if (*s == '>')
-	{
-		if (*(s + 1) == '>')
-			return (2);
-		return (1);
-	}
-	return (0);
-}
-
-/* COUNT TOKENS:
-	- loop through input
+/* count_tokens:
+	- outer while loop iterates through input `s` string
 	- skip spaces
 	- if something: increment token count
-	- if metachar: advance i by 1 or 2
-	- if regular character: advance until space or metacharacter
-	- return count                                                  */
+	- if `quote_char`: advance i by length of quote; outer while next iteration
+	- if !(quote_char)
+		- if `metachar`: advance i by 1 or 2; outer while next iteration
+		- if !(metachar): advance until space or meta/quote
+	- return count
+*/
 static int	count_tokens(const char *s)
 {
 	int	i;
-	int	meta;
 	int	count;
 
 	i = 0;
@@ -60,42 +40,44 @@ static int	count_tokens(const char *s)
 			i++;
 		if (s[i])
 			count++;
-		meta = is_metachar(s + i);
-		if (meta)
-			i += meta;
-		else
-			while (s[i] && !is_space(s[i]) && !is_metachar(s + i))
-				i++;
+		if (!check(&is_quotechar, s, &i))
+		{
+			if (!check(&is_metachar, s, &i))
+				while (s[i] && !is_space(s[i]) && !is_metachar(s + i)
+					&& !is_quotechar(s + i))
+					i++;
+		}
 	}
 	return (count);
 }
 
-/* Extract Tokens:
+/* extract_tokens:
 	- skip spaces
-	- if metachar extract it using ft_substr), advance *i
+	- if quotechar extract it using ft_substr, advance *i
+	- if metachar extract it using ft_substr, advance *i
 	- if it's a word, extract it, store it and advance *i
-	- if storage OK, return token, otherwise return NULL       */
+	- if storage OK, return token, otherwise return NULL
+*/
 static char	*extract_tokens(const char *s, int *i)
 {
 	int		j;
-	int		meta;
 	char	*token;
 
 	while (s[*i] && is_space(s[*i]))
 		(*i)++;
-	meta = is_metachar(s + *i);
-	if (meta)
+	token = extract_if(s, i, &is_quotechar);
+	if (!token)
 	{
-		token = ft_substr(s, *i, meta);
-		*i += meta;
-	}
-	else
-	{
-		j = 0;
-		while (s[*i + j] && !is_space(s[*i + j]) && !is_metachar(s + *i + j))
-			j++;
-		token = ft_substr(s, *i, j);
-		*i += j;
+		token = extract_if(s, i, &is_metachar);
+		if (!token)
+		{
+			j = 0;
+			while (s[*i + j] && !is_space(s[*i + j]) && !is_metachar(s + *i + j)
+				&& !is_quotechar(s + *i + j))
+				j++;
+			token = ft_substr(s, *i, j);
+			*i += j;
+		}
 	}
 	if (!token)
 		return (NULL);
@@ -106,7 +88,8 @@ static char	*extract_tokens(const char *s, int *i)
   1. count_tokens(input)
   2. allocate memory for char **tokens: nr_tokens + 1 for terminating NULL
   3. populate array: *extract_tokens
-  4. Return **tokens;                                                   */
+  4. Return **tokens;
+*/
 char	**tokenize(const char *input)
 {
 	int		i;

@@ -6,11 +6,10 @@
 /*   By: anemet <anemet@student.42luxembourg.lu>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/02 10:22:42 by anemet            #+#    #+#             */
-/*   Updated: 2025/08/02 11:19:51 by anemet           ###   ########.fr       */
+/*   Updated: 2025/08/02 19:30:54 by anemet           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "libft.h"
 #include "minishell.h"
 
 /*
