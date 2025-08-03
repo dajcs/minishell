@@ -6,7 +6,7 @@
 /*   By: anemet <anemet@student.42luxembourg.lu>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/01 15:09:07 by anemet            #+#    #+#             */
-/*   Updated: 2025/08/02 19:31:51 by anemet           ###   ########.fr       */
+/*   Updated: 2025/08/03 14:01:22 by anemet           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,7 +24,7 @@
 	- if `quote_char`: advance i by length of quote; outer while next iteration
 	- if !(quote_char)
 		- if `metachar`: advance i by 1 or 2; outer while next iteration
-		- if !(metachar): advance until space or meta/quote
+		- if !(metachar): advance until next space/meta/quote char
 	- return count
 */
 static int	count_tokens(const char *s)
@@ -43,9 +43,7 @@ static int	count_tokens(const char *s)
 		if (!check(&is_quotechar, s, &i))
 		{
 			if (!check(&is_metachar, s, &i))
-				while (s[i] && !is_space(s[i]) && !is_metachar(s + i)
-					&& !is_quotechar(s + i))
-					i++;
+				end_varchar(s, &i);
 		}
 	}
 	return (count);
@@ -79,8 +77,6 @@ static char	*extract_tokens(const char *s, int *i)
 			*i += j;
 		}
 	}
-	if (!token)
-		return (NULL);
 	return (token);
 }
 
@@ -107,7 +103,10 @@ char	**tokenize(const char *input)
 	{
 		tokens[tok] = extract_tokens(input, &i);
 		if (!tokens[tok])
+		{
+			free_tokens(tokens);
 			return (NULL);
+		}
 		tok++;
 	}
 	tokens[tok] = NULL;

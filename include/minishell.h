@@ -6,7 +6,7 @@
 /*   By: anemet <anemet@student.42luxembourg.lu>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/01 14:25:53 by anemet            #+#    #+#             */
-/*   Updated: 2025/08/02 19:30:38 by anemet           ###   ########.fr       */
+/*   Updated: 2025/08/03 16:41:25 by anemet           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,20 +38,27 @@ typedef struct s_command
 	struct s_command	*next;			// for now will always be NULL
 }				t_command;
 
-// for now we're representing a token list as a simple array of strings
-// typedef struct s_shell
-// {
-// 	char	**tokens;
-// 	// we'll add here more fields later (e.g., the command list)
-// }	t_shell;
-
-// update t_shell to hold the final command list, not the raw tokens
+// t_shell holds the final command list
 typedef struct s_shell
 {
 	t_command	*commands;
 	int			last_exit_status;
 	// we'll add here more fields later (e.g., environment list)
 }				t_shell;
+
+// t_expand members put in a struct because of 25 lines
+typedef struct s_expand
+{
+	int		alen;			// length of token after var
+	int		vlen;			// variable length
+	char	*dollar;		// pointer to $ char in a token
+	char	*var;			// var string
+	char	*var_val;		// var expanded to var_val string
+	char	*before_var;	// token string before the $ sign
+	char	*after_var;		// token string after the var
+	char	*tmp_token;		// tmp string: before_val + var_val
+	char	*new_token;		// new_token: before_val + var_val + after_var
+}				t_expand;
 
 /* ----- Function Prototypes ----- */
 
@@ -64,6 +71,7 @@ int				is_quotechar(const char *s);
 int				check(int (*checker_func)(const char *), const char *s, int *i);
 char			*extract_if(const char *s, int *i,
 					int (*checker_func)(const char *));
+void			end_varchar(const char *s, int *i);
 
 /* src/parsing/expander.c */
 char			**expand_and_clean(char **tokens, int last_exit_status);

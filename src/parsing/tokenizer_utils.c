@@ -6,11 +6,10 @@
 /*   By: anemet <anemet@student.42luxembourg.lu>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/02 19:13:22 by anemet            #+#    #+#             */
-/*   Updated: 2025/08/02 19:18:38 by anemet           ###   ########.fr       */
+/*   Updated: 2025/08/03 16:55:53 by anemet           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "libft.h"
 #include "minishell.h"
 
 // A helper to check for metacharacters
@@ -35,7 +34,7 @@ int	is_metachar(const char *s)
 }
 
 // A helper to check for quote_char ' or "
-// Returns the length of the length of the string enclosed in quotes
+// Returns the length of the string enclosed in quotes
 // if not quote_char, return 0
 int	is_quotechar(const char *s)
 {
@@ -88,4 +87,20 @@ char	*extract_if(const char *s, int *i, int (*checker_func)(const char *))
 		*i += len;
 	}
 	return (token);
+}
+
+/* end_varchar
+	- advances *i through the string s over "ordinary" characters
+	- stops when encounters space/$/meta/quote character
+*/
+void	end_varchar(const char *s, int *i)
+{
+	if (s[*i] == '?')
+	{
+		(*i)++;
+		return ;
+	}
+	while (s[*i] && !is_space(s[*i]) && s[*i] != '$'
+		&& !is_metachar(s + *i) && !is_quotechar(s + *i))
+		(*i)++;
 }

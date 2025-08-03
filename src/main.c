@@ -6,7 +6,7 @@
 /*   By: anemet <anemet@student.42luxembourg.lu>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/01 14:34:51 by anemet            #+#    #+#             */
-/*   Updated: 2025/08/02 11:12:47 by anemet           ###   ########.fr       */
+/*   Updated: 2025/08/03 13:58:48 by anemet           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,20 +53,25 @@ void	print_command(t_command *cmd)
 
 // The main loop of the shell
 /*
+  0. Initialize shell data
   1. Read input using readline
   2. Handle Ctrl-D (readline returns NULL -> exit())
   3. Add to history if the line is not empty
-  4. Tokenize the input line
-  5. Parse tokens into a command structure
-  5. Print the content of the parsed command structure
+  4. Tokenize (gets raw tokens with quotes)
+  5. Expand and Clean (expands $, removes quotes)
+  5. Parse (creates t_command from clean tokens)
+  5. TESTING (This will be replaced by the executor later)
   6. Free all allocated memory for this cycle
 */
 void	shell_loop(void)
 {
 	char	*line;
-	char	**tokens;
+	char	**raw_tokens;
+	char	**final_tokens;
 	t_shell	shell_data;
 
+	shell_data.commands = NULL;
+	shell_data.last_exit_status = 0;
 	while (1)
 	{
 		line = readline("minishell> ");
@@ -77,15 +82,23 @@ void	shell_loop(void)
 		}
 		if (line && *line)
 			add_history(line);
-		tokens = tokenize(line);
-		if (tokens)
-			shell_data.commands = parse(tokens);
+		raw_tokens = tokenize(line);
+		if (raw_tokens)
+			final_tokens = expand_and_clean(raw_tokens,
+					shell_data.last_exit_status);
+		else
+			final_tokens = NULL;
+		if (final_tokens)
+			shell_data.commands = parse(final_tokens);
 		else
 			shell_data.commands = NULL;
-		print_command(shell_data.commands);
+		if (shell_data.commands)
+			print_command(shell_data.commands);
 		free(line);
-		if (tokens)
-			free_tokens(tokens);
+		if (raw_tokens)
+			free_tokens(raw_tokens);
+		if (final_tokens)
+			free_tokens(final_tokens);
 		if (shell_data.commands)
 			free_command_list(shell_data.commands);
 	}
