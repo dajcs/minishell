@@ -6,7 +6,7 @@
 /*   By: anemet <anemet@student.42luxembourg.lu>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/01 14:25:53 by anemet            #+#    #+#             */
-/*   Updated: 2025/08/03 16:41:25 by anemet           ###   ########.fr       */
+/*   Updated: 2025/08/03 20:04:34 by anemet           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,17 +26,34 @@
 # define STDOUT_FILENO 1
 # define STDERR_FILENO 2
 
+/* ----- Enums ----- */
+typedef enum e_redir_type
+{
+	REDIR_INPUT,
+	REDIR_OUTPUT,
+	REDIR_HEREDOC,
+	REDIR_APPEND
+}	t_redir_type;
+
 /* ----- Structures ----- */
 
+// t_redir to represent a single redirection
+typedef struct s_redir
+{
+	t_redir_type	type;
+	char			*filename;	// The filename or delimiter
+	struct s_redir	*next;
+}	t_redir;
+
+// t_command a linked list of commands with arguments and redirections
 typedef struct s_command
 {
 	char				*command;		// the command itself (e.g., "ls")
 	char				**arguments;	/* full arguments array for execve
 										(e.g., {"ls", "-l", NULL}) */
-	int					input_fd;		// for now STDIN_FILENO
-	int					output_fd;		// for now STDOUT_FILENO
-	struct s_command	*next;			// for now will always be NULL
-}				t_command;
+	t_redir				*redirections;	// A linked list of redirections
+	struct s_command	*next;			// Next command in the pipeline
+}	t_command;
 
 // t_shell holds the final command list
 typedef struct s_shell
@@ -44,7 +61,7 @@ typedef struct s_shell
 	t_command	*commands;
 	int			last_exit_status;
 	// we'll add here more fields later (e.g., environment list)
-}				t_shell;
+}	t_shell;
 
 // t_expand members put in a struct because of 25 lines
 typedef struct s_expand
@@ -58,7 +75,7 @@ typedef struct s_expand
 	char	*after_var;		// token string after the var
 	char	*tmp_token;		// tmp string: before_val + var_val
 	char	*new_token;		// new_token: before_val + var_val + after_var
-}				t_expand;
+}	t_expand;
 
 /* ----- Function Prototypes ----- */
 

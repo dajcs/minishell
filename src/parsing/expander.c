@@ -6,7 +6,7 @@
 /*   By: anemet <anemet@student.42luxembourg.lu>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/02 11:34:10 by anemet            #+#    #+#             */
-/*   Updated: 2025/08/03 18:14:50 by anemet           ###   ########.fr       */
+/*   Updated: 2025/08/03 18:38:37 by anemet           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,7 +31,8 @@ static char	*get_env_value(const char *var_name)
 }
 
 /* expand_once()
-	searches the token for $var and expands the first found
+	searches the token for $var and expands the first var
+	return the orig token if no vars inside or the new expanded token otherwise
 
 	int		alen;			// length of token after var
 	int		vlen;			// length of var
@@ -91,11 +92,13 @@ char	*expand_once(char *token, int last_exit_status)
 		return a new substr by removing the outer quotes
  2. Variable expansion ($):
 	- create a work copy of the token
-	- execute repeatedly expand_once() until there is
+	- execute repeatedly expand_once() until
 		no difference between work and next
+		(while always freeing the old work string)
  3. Quote removal:
-	- After all expansion is done, if the token was quoted, create a new
-		substring strip that omits the first and last characters and return it
+	- After all expansions are done, if the token was quoted, create a new
+		substring strip that omits the first and last characters
+		free the old work string and return the strip string
  4. If there was no quote return the expanded work string.
 */
 static char	*process_single_token(char *token, int last_exit_status)

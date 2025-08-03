@@ -6,11 +6,25 @@
 /*   By: anemet <anemet@student.42luxembourg.lu>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/02 10:22:42 by anemet            #+#    #+#             */
-/*   Updated: 2025/08/02 19:30:54 by anemet           ###   ########.fr       */
+/*   Updated: 2025/08/03 20:25:57 by anemet           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
+
+// return redirection type of the token, or -1 if not token is not redirection
+t_redir_type	get_redir_type(char *token)
+{
+	if (ft_strcmp(token, "<") == 0)
+		return (REDIR_INPUT);
+	if (ft_strcmp(token, ">") == 0)
+		return (REDIR_OUTPUT);
+	if (ft_strcmp(token, "<<") == 0)
+		return (REDIR_HEREDOC);
+	if (ft_strcmp(token, ">>") == 0)
+		return (REDIR_APPEND);
+	return -1;
+}
 
 /*
   A helper function to duplicate a NULL-terminated array of strings
@@ -46,10 +60,11 @@ static char	**duplicate_string_array(char **array)
 }
 
 /*
-  The main parsing function for parsing / step 2
-  It takes the token list and creates a single t_command struct
+  The main parsing function for parsing / step 4
+  It takes the token list and creates a list of t_command structs
   1. Handle edge cases (no tokens or empty input)
   2. Allocate memory for the struct t_command cmd
+  3. put it on the head of t_command list
   3. Populate the struct's fields
 		The command is the first token. We need our own copy (ft_strdup)
 		The arguments are a DEEP COPY of the entire token array
@@ -58,33 +73,57 @@ static char	**duplicate_string_array(char **array)
 */
 t_command	*parse(char **tokens)
 {
-	t_command	*cmd;
+	t_command	*head;
+	t_command	*current_cmd;
+	t_list		*arg_list;
+	t_redir_type type;
+	int			i;
+
+	i = 0;
+	arg_list = NULL;
 
 	if (!tokens || !tokens[0])
 		return (NULL);
-	cmd = malloc(sizeof(t_command));
-	if (!cmd)
-		return (NULL);
-	cmd->command = ft_strdup(tokens[0]);
-	if (!cmd->command)
+	current_cmd = ft_calloc(1, sizeof(t_command));
+	head = current_cmd;
+	while (tokens[i])
 	{
-		free(cmd);
-		return (NULL);
+		type = get_redir_type(tokens[i]);
+		if (type != -1) // it's a redirection
+		{
+			/*
+			- create a new t_redir node
+			- set its type
+			- set its filename (from tokens[i+1])
+			- add it to current_cmd->redirections list
+			*/
+			i += 2; // Skip over the operator and filename
+		}
+		else if (ft_strcmp(tokens[i], "|") == 0) // it's a pipe
+		{
+			// 1. finalize the current command's arguments from arg_list
+			current_cmd->arguments = convert_list_to_array(arg_list);
+			ft_lstclear(&arg_list, free); // reset for next command
+			// 2. create and link the next command
+			current_cmd->next = ft_calloc(1, sizeof(t_command));
+			current_cmd = current_cmd->next;
+			i++;
+		}
+		else // it's normal argument
+		{
+			// add tokens[i] to the temporary arg_list
+			ft_lstadd_back(&arg_list, ft_lstnew(ft_strdup(tokens[i])));
+			i++;
+		}
 	}
-	cmd->arguments = duplicate_string_array(tokens);
-	if (!cmd->arguments)
-	{
-		free(cmd->command);
-		free(cmd);
-		return (NULL);
-	}
-	cmd->input_fd = STDIN_FILENO;
-	cmd->output_fd = STDOUT_FILENO;
-	cmd->next = NULL;
-	return (cmd);
+	// Finalize the last command's arguments
+	current_cmd->arguments = convert_list_to_array(arg_list);
+	ft_lstclear(&arg_list, free);
+	return (head);
 }
 
 /*
+	TODO: update 
   Frees all memory associated with a command list
   Iterates through the linked list
 	- free command
