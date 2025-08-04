@@ -6,7 +6,7 @@
 #    By: anemet <anemet@student.42luxembourg.lu>    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/08/01 14:10:19 by anemet            #+#    #+#              #
-#    Updated: 2025/08/04 10:42:49 by anemet           ###   ########.fr        #
+#    Updated: 2025/08/04 16:51:55 by anemet           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -23,7 +23,9 @@ SRCS = src/main.c \
 	   src/parsing/tokenizer_utils.c \
        src/parsing/parser.c \
 	   src/parsing/parser_utils.c \
-       src/parsing/expander.c
+       src/parsing/expander.c 
+# 	   src/execution/executor.c \
+# 	   src/execution/path_finder.c
 
 # Object files
 OBJS = $(SRCS:.c=.o)

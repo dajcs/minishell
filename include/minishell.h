@@ -6,7 +6,7 @@
 /*   By: anemet <anemet@student.42luxembourg.lu>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/01 14:25:53 by anemet            #+#    #+#             */
-/*   Updated: 2025/08/04 14:33:21 by anemet           ###   ########.fr       */
+/*   Updated: 2025/08/04 16:55:37 by anemet           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -82,6 +82,7 @@ typedef struct s_expand
 
 /* src/parsing/tokenizer.c */
 char			**tokenize(const char *input);
+void			free_tokens(char **tokens);
 
 /* src/parsing/tokenizer_utils.c */
 int				is_metachar(const char *s);
@@ -101,9 +102,12 @@ t_command		*parse(char **tokens);
 char			**convert_list_to_array(t_list *list);
 void			free_command_list(t_command *list_head);
 t_command		*handle_pipe(t_command *cmd, t_list **arg_list);
-
-// Utility functions
-void			free_tokens(char **tokens);
 void			free_command_list(t_command *list);
+
+/* src/execution/path_finder.c */
+// char			*find_command_path(char *command);
+
+/* src/execution/executor.c */
+// int				execute(t_shell *shell_data);	// returns the exit status
 
 #endif

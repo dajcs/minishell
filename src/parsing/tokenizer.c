@@ -6,7 +6,7 @@
 /*   By: anemet <anemet@student.42luxembourg.lu>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/01 15:09:07 by anemet            #+#    #+#             */
-/*   Updated: 2025/08/03 14:01:22 by anemet           ###   ########.fr       */
+/*   Updated: 2025/08/04 17:56:50 by anemet           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,7 +43,9 @@ static int	count_tokens(const char *s)
 		if (!check(&is_quotechar, s, &i))
 		{
 			if (!check(&is_metachar, s, &i))
-				end_varchar(s, &i);
+			while (s[i] && !is_space(s[i]) && !is_metachar(s + i)
+				&& !is_quotechar(s + i))
+				i++;
 		}
 	}
 	return (count);

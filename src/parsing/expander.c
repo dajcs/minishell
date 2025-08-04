@@ -6,30 +6,28 @@
 /*   By: anemet <anemet@student.42luxembourg.lu>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/02 11:34:10 by anemet            #+#    #+#             */
-/*   Updated: 2025/08/03 18:38:37 by anemet           ###   ########.fr       */
+/*   Updated: 2025/08/04 17:49:07 by anemet           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
-/* Placeholder for getting an environment variable's value
-	- Use the real getenv() here
+
+/* get_env_value
+	- Using getenv() to get value
 	- char *value = getenv(var_name);
 	- return (ft_strdup(value)); // Return a copy
-	- For now, a mock for testing for USER/HOME/HOST
 	- Return empty string if not found, like bash
 */
-static char	*get_env_value(const char *var_name)
+char	*get_env_value(const char *var_name)
 {
-	if (ft_strncmp(var_name, "USER", 5) == 0)
-		return (ft_strdup("anemet"));
-	if (ft_strncmp(var_name, "HOME", 5) == 0)
-		return (ft_strdup("/home/anemet"));
-	if (ft_strncmp(var_name, "HOST", 5) == 0)
-		return (ft_strdup("c2r7s5.42luxembourg.lu"));
-	return (ft_strdup(""));
-}
+	char	*value;
 
+	value = getenv(var_name);
+	if (value == NULL)
+		return (ft_strdup(""));
+	return (ft_strdup(value));
+}
 /* expand_once()
 	searches the token for $var and expands the first var
 	return the orig token if no vars inside or the new expanded token otherwise
