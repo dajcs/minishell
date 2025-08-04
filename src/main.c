@@ -6,7 +6,7 @@
 /*   By: anemet <anemet@student.42luxembourg.lu>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/01 14:34:51 by anemet            #+#    #+#             */
-/*   Updated: 2025/08/04 12:47:14 by anemet           ###   ########.fr       */
+/*   Updated: 2025/08/04 19:34:48 by anemet           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -74,7 +74,7 @@ void	print_command_list(t_command *cmd_list)
   5. TESTING (This will be replaced by the executor later)
   6. Free all allocated memory for this cycle
 */
-void	shell_loop(void)
+void	shell_loop(char **envp)
 {
 	char	*line;
 	char	**raw_tokens;
@@ -105,6 +105,9 @@ void	shell_loop(void)
 			shell_data.commands = NULL;
 		if (shell_data.commands)
 			print_command_list(shell_data.commands);
+
+		execute(&shell_data, envp);
+
 		free(line);
 		if (raw_tokens)
 			free_tokens(raw_tokens);
@@ -115,9 +118,13 @@ void	shell_loop(void)
 	}
 }
 
-// we'll setup signals here later
-int	main(void)
+/* main
+	- passing envp to shell_loop
+*/
+int	main(int argc, char **argv, char **envp)
 {
-	shell_loop();
+	(void)argc;
+	(void)argv;
+	shell_loop(envp);
 	return (0);
 }

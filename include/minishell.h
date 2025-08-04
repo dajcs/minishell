@@ -6,7 +6,7 @@
 /*   By: anemet <anemet@student.42luxembourg.lu>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/01 14:25:53 by anemet            #+#    #+#             */
-/*   Updated: 2025/08/04 16:55:37 by anemet           ###   ########.fr       */
+/*   Updated: 2025/08/04 19:43:36 by anemet           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,7 @@
 # define MINISHELL_H
 
 /* ----- Includes ----- */
+# include <sys/wait.h>
 # include <readline/history.h>
 # include <readline/readline.h>
 # include <stdio.h>
@@ -30,10 +31,10 @@
 typedef enum e_redir_type
 {
 	REDIR_NONE = -1,
-	REDIR_INPUT,
-	REDIR_OUTPUT,
-	REDIR_HEREDOC,
-	REDIR_APPEND
+	REDIR_INPUT = 0,
+	REDIR_OUTPUT = 1,
+	REDIR_HEREDOC = 2,
+	REDIR_APPEND = 3
 }	t_redir_type;
 
 /* ----- Structures ----- */
@@ -105,9 +106,9 @@ t_command		*handle_pipe(t_command *cmd, t_list **arg_list);
 void			free_command_list(t_command *list);
 
 /* src/execution/path_finder.c */
-// char			*find_command_path(char *command);
+char			*find_command_path(char *command);
 
 /* src/execution/executor.c */
-// int				execute(t_shell *shell_data);	// returns the exit status
+int				execute(t_shell *shell_data, char **envp);	// returns exit st.
 
 #endif
