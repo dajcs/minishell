@@ -6,7 +6,7 @@
 /*   By: anemet <anemet@student.42luxembourg.lu>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/01 14:34:51 by anemet            #+#    #+#             */
-/*   Updated: 2025/08/03 13:58:48 by anemet           ###   ########.fr       */
+/*   Updated: 2025/08/04 12:47:14 by anemet           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,28 +27,39 @@ void	check_tokens(t_shell shell_data)
 */
 
 // --- Helper function for testing ---
-void	print_command(t_command *cmd)
+void	print_command_list(t_command *cmd_list)
 {
-	int	i;
+	int		i;
+	int		j;
+	t_redir	*redir;
 
-	if (!cmd)
-		return ;
-	printf("--- Command ---\n");
-	printf("Command: \"%s\"\n", cmd->command);
-	printf("Arguments:\n");
-	if (cmd->arguments)
+	i = 1;
+	while (cmd_list)
 	{
-		i = 0;
-		while (cmd->arguments[i])
+		printf("--- Command #%d ---\n", i++);
+		if (cmd_list->cmd_args)
 		{
-			printf("  [%d]: \"%s\"\n", i, cmd->arguments[i]);
-			i++;
+			printf("cmd_args: ");
+			j = 0;
+			while (cmd_list->cmd_args[j])
+			{
+				printf("[%s] ", cmd_list->cmd_args[j]);
+				j++;
+			}
+			printf("\n");
 		}
+		redir = cmd_list->redirections;
+		while (redir)
+		{
+			printf("  Redirection: TYPE=%d, FILENAME=%s\n", redir->type,
+				redir->filename);
+			redir = redir->next;
+		}
+		cmd_list = cmd_list->next;
+		if (cmd_list)
+			printf("  | (pipe to next command)\n");
 	}
-	printf("Input FD: %d\n", cmd->input_fd);
-	printf("Output FD: %d\n", cmd->output_fd);
-	printf("Next command: %p\n", cmd->next);
-	printf("------------------\n");
+	printf("---------------------------------\n");
 }
 
 // The main loop of the shell
@@ -93,7 +104,7 @@ void	shell_loop(void)
 		else
 			shell_data.commands = NULL;
 		if (shell_data.commands)
-			print_command(shell_data.commands);
+			print_command_list(shell_data.commands);
 		free(line);
 		if (raw_tokens)
 			free_tokens(raw_tokens);

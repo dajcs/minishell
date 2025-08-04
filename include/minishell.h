@@ -6,7 +6,7 @@
 /*   By: anemet <anemet@student.42luxembourg.lu>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/01 14:25:53 by anemet            #+#    #+#             */
-/*   Updated: 2025/08/03 20:04:34 by anemet           ###   ########.fr       */
+/*   Updated: 2025/08/04 14:33:21 by anemet           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,6 +29,7 @@
 /* ----- Enums ----- */
 typedef enum e_redir_type
 {
+	REDIR_NONE = -1,
 	REDIR_INPUT,
 	REDIR_OUTPUT,
 	REDIR_HEREDOC,
@@ -48,9 +49,9 @@ typedef struct s_redir
 // t_command a linked list of commands with arguments and redirections
 typedef struct s_command
 {
-	char				*command;		// the command itself (e.g., "ls")
-	char				**arguments;	/* full arguments array for execve
-										(e.g., {"ls", "-l", NULL}) */
+	// char				*command;		// the command itself (e.g., "ls")
+	char				**cmd_args;		/* full arguments array for execve
+											(e.g., {"ls", "-l", NULL}) */
 	t_redir				*redirections;	// A linked list of redirections
 	struct s_command	*next;			// Next command in the pipeline
 }	t_command;
@@ -95,6 +96,11 @@ char			**expand_and_clean(char **tokens, int last_exit_status);
 
 /* src/parsing/parser.c */
 t_command		*parse(char **tokens);
+
+/* src/parsing/parser_utils.c */
+char			**convert_list_to_array(t_list *list);
+void			free_command_list(t_command *list_head);
+t_command		*handle_pipe(t_command *cmd, t_list **arg_list);
 
 // Utility functions
 void			free_tokens(char **tokens);
