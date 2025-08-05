@@ -6,11 +6,36 @@
 /*   By: anemet <anemet@student.42luxembourg.lu>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/04 18:59:00 by anemet            #+#    #+#             */
-/*   Updated: 2025/08/04 19:47:11 by anemet           ###   ########.fr       */
+/*   Updated: 2025/08/05 08:56:01 by anemet           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
+
+/* dispatch_builtin()
+	- Checks if the command is a built-in and executes it if so
+		returns the built-in's exit code
+	- Returns -1 if not built-in
+*/
+static int	dispatch_builtin(t_shell *shell_data, char **envp)
+{
+	char	**args;
+
+	args = shell_data->commands->cmd_args;
+	if (args == NULL || args[0] == NULL)
+		return (-1);
+	if (ft_strncmp(args[0], "echo", 5) == 0)
+		return (builtin_echo(args));
+	if (ft_strncmp(args[0], "cd", 3) == 0)
+		return (builtin_cd(args));
+	if (ft_strncmp(args[0], "pwd", 4) == 0)
+		return (builtin_pwd(args));
+	if (ft_strncmp(args[0], "env", 4) == 0)
+		return (builtin_env(envp));
+	if (ft_strncmp(args[0], "exit", 5) == 0)
+		return (builtin_exit(shell_data, args));
+	return (-1);
+}
 
 /* execute_single_command
 	- fork
@@ -65,11 +90,17 @@ int	execute(t_shell *shell_data, char **envp)
 		return (0);
 	if (cmd && !cmd->next)
 	{
-		execute_single_command(cmd, envp);
-		wait(&status);
-		if (WIFEXITED(status))
+		status = dispatch_builtin(shell_data, envp);
+		if (status != -1)
 		{
-			shell_data->last_exit_status = WEXITSTATUS(status);
+			shell_data->last_exit_status = status;
+		}
+		else
+		{
+			execute_single_command(cmd, envp);
+			wait(&status);
+			if (WIFEXITED(status))
+				shell_data->last_exit_status = WEXITSTATUS(status);
 		}
 	}
 	return (shell_data->last_exit_status);

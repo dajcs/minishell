@@ -1,41 +1,26 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   builtin_echo.c                                     :+:      :+:    :+:   */
+/*   builtin_env.c                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: anemet <anemet@student.42luxembourg.lu>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/08/04 20:28:24 by anemet            #+#    #+#             */
-/*   Updated: 2025/08/05 08:52:44 by anemet           ###   ########.fr       */
+/*   Created: 2025/08/05 08:29:39 by anemet            #+#    #+#             */
+/*   Updated: 2025/08/05 08:30:34 by anemet           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
-/* builtin_echo
-	- prints the words in args[1]... separated by a space, terminating by '\n'
-	- if flag '-n' is in args[1] then it doesn't print the terminating '\n'
-*/
-int	builtin_echo(char **args)
+int	builtin_env(char **envp)
 {
 	int	i;
-	int	newline_flag;
 
-	i = 1;
-	newline_flag = 1;
-	if (args[i] && ft_strncmp(args[i], "-n", 3) == 0)
+	i = 0;
+	while (envp[i])
 	{
-		newline_flag = 0;
+		printf("%s\n", envp[i]);
 		i++;
 	}
-	while (args[i])
-	{
-		printf("%s", args[i]);
-		if (args[i + 1])
-			printf(" ");
-		i++;
-	}
-	if (newline_flag)
-		printf("\n");
 	return (0);
 }
