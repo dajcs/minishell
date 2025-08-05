@@ -20,32 +20,30 @@ minishell/
     ├── main.c
     │
     ├── parsing/
-    │   ├── 01_tokenizer.c
-    │   ├── 02_parser.c
-    │   ├── 03_expander.c
-    │   └── 04_quotes.c
+    │   ├── tokenizer.c
+    │   ├── tokenizer_utils.c
+    │   ├── parser.c
+    │   ├── parser_utils.c
+    │   └── expander.c
     │
     ├── execution/
-    │   ├── 01_executor.c
-    │   ├── 02_path_finder.c
-    │   ├── 03_redirections.c
-    │   └── 04_pipes.c
+    │   ├── executor.c
+    │   ├── path_finder.c
+    │   ├── redirections.c
+    │   └── signals.c
     │
-    ├── builtins/
-    │   ├── builtin_cd.c
-    │   ├── builtin_echo.c
-    │   ├── builtin_env.c
-    │   └── ... (etc.)
-    │
-    └── shared/
-        ├── signals.c
-        └── error_handling.c
+    └── builtins/
+        ├── builtin_cd.c
+        ├── builtin_echo.c
+        ├── builtin_env.c
+        └── ... (etc.)
+
 ```
 
 ---
 
 
-Of course. Here is a detailed plan for dividing the Minishell project between two groups to allow for independent development and testing before integration.
+A detailed plan for dividing the Minishell project between two groups to allow for independent development and testing before integration.
 
 ### The Core Principle: Separation of Concerns
 
@@ -61,16 +59,16 @@ The "contract" between the two groups will be the data structure that represents
 A good way to represent commands is with a linked list of structures, where each structure represents a single command in a pipeline.
 
 ```c
-// A single command, like "grep -i "hello""
-typedef struct s_command {
-    char                *command;       // e.g., "grep"
-    char                **arguments;    // e.g., {"grep", "-i", "hello", NULL}
-    int                 input_fd;       // FD for input redirection (<, <<)
-    int                 output_fd;      // FD for output redirection (>, >>)
-    struct s_command    *next;          // Next command in the pipeline, or NULL
-} t_command;
+// t_command a linked list of commands with arguments and redirections
+typedef struct s_command
+{
+	// char				*command;		// e.g., "grep"
+	char				**cmd_args;		/* full arguments array for execve
+											e.g., {"grep", "-i", "hello", NULL} */
+	t_redir				*redirections;	// A linked list of redirections
+	struct s_command	*next;			// Next command in the pipeline
+}	t_command;
 ```
-
 ---
 
 ## Group 1: The Parser Team (Command Line Interpretation)
