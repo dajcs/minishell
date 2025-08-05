@@ -6,12 +6,11 @@
 /*   By: anemet <anemet@student.42luxembourg.lu>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/02 11:34:10 by anemet            #+#    #+#             */
-/*   Updated: 2025/08/04 17:49:07 by anemet           ###   ########.fr       */
+/*   Updated: 2025/08/05 15:36:55 by anemet           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
-
 
 /* get_env_value
 	- Using getenv() to get value
@@ -28,6 +27,7 @@ char	*get_env_value(const char *var_name)
 		return (ft_strdup(""));
 	return (ft_strdup(value));
 }
+
 /* expand_once()
 	searches the token for $var and expands the first var
 	return the orig token if no vars inside or the new expanded token otherwise

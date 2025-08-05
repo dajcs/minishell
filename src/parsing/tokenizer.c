@@ -43,9 +43,9 @@ static int	count_tokens(const char *s)
 		if (!check(&is_quotechar, s, &i))
 		{
 			if (!check(&is_metachar, s, &i))
-			while (s[i] && !is_space(s[i]) && !is_metachar(s + i)
-				&& !is_quotechar(s + i))
-				i++;
+				while (s[i] && !is_space(s[i]) && !is_metachar(s + i)
+					&& !is_quotechar(s + i))
+					i++;
 		}
 	}
 	return (count);

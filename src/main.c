@@ -68,9 +68,9 @@ void	print_command_list(t_command *cmd_list)
 	- free all
 	- set shell->commands = NULL to prevent double free on next loop
 */
-void free_loop_resources(t_shell *shell, char *line, char **raw, char **final)
+void	free_loop_resources(t_shell *shell, char *line, char **raw,
+		char **final)
 {
-
 	if (line)
 		free(line);
 	if (raw)
@@ -126,12 +126,11 @@ void	shell_loop(char **envp)
 			shell_data.commands = NULL;
 		// if (shell_data.commands)
 		// 	print_command_list(shell_data.commands);
-
 		exit_status = execute(&shell_data, envp);
 		if (exit_status == EXIT_BUILTIN_CODE)
 		{
 			free_loop_resources(&shell_data, line, raw_tokens, final_tokens);
-			break;
+			break ;
 		}
 		free_loop_resources(&shell_data, line, raw_tokens, final_tokens);
 	}
