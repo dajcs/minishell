@@ -6,7 +6,7 @@
 /*   By: anemet <anemet@student.42luxembourg.lu>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/01 14:34:51 by anemet            #+#    #+#             */
-/*   Updated: 2025/08/04 19:34:48 by anemet           ###   ########.fr       */
+/*   Updated: 2025/08/05 09:46:21 by anemet           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,6 +27,7 @@ void	check_tokens(t_shell shell_data)
 */
 
 // --- Helper function for testing ---
+/*
 void	print_command_list(t_command *cmd_list)
 {
 	int		i;
@@ -61,6 +62,25 @@ void	print_command_list(t_command *cmd_list)
 	}
 	printf("---------------------------------\n");
 }
+*/
+
+/* free_loop_resources
+	- free all
+	- set shell->commands = NULL to prevent double free on next loop
+*/
+void free_loop_resources(t_shell *shell, char *line, char **raw, char **final)
+{
+
+	if (line)
+		free(line);
+	if (raw)
+		free_tokens(raw);
+	if (final)
+		free_tokens(final);
+	if (shell->commands)
+		free_command_list(shell->commands);
+	shell->commands = NULL;
+}
 
 // The main loop of the shell
 /*
@@ -76,6 +96,7 @@ void	print_command_list(t_command *cmd_list)
 */
 void	shell_loop(char **envp)
 {
+	int		exit_status;
 	char	*line;
 	char	**raw_tokens;
 	char	**final_tokens;
@@ -103,18 +124,16 @@ void	shell_loop(char **envp)
 			shell_data.commands = parse(final_tokens);
 		else
 			shell_data.commands = NULL;
-		if (shell_data.commands)
-			print_command_list(shell_data.commands);
+		// if (shell_data.commands)
+		// 	print_command_list(shell_data.commands);
 
-		execute(&shell_data, envp);
-
-		free(line);
-		if (raw_tokens)
-			free_tokens(raw_tokens);
-		if (final_tokens)
-			free_tokens(final_tokens);
-		if (shell_data.commands)
-			free_command_list(shell_data.commands);
+		exit_status = execute(&shell_data, envp);
+		if (exit_status == EXIT_BUILTIN_CODE)
+		{
+			free_loop_resources(&shell_data, line, raw_tokens, final_tokens);
+			break;
+		}
+		free_loop_resources(&shell_data, line, raw_tokens, final_tokens);
 	}
 }
 

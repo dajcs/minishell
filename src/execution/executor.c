@@ -6,7 +6,7 @@
 /*   By: anemet <anemet@student.42luxembourg.lu>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/04 18:59:00 by anemet            #+#    #+#             */
-/*   Updated: 2025/08/05 08:56:01 by anemet           ###   ########.fr       */
+/*   Updated: 2025/08/05 09:38:04 by anemet           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,7 @@
 /* dispatch_builtin()
 	- Checks if the command is a built-in and executes it if so
 		returns the built-in's exit code
+		(builtin_exit returns 255 -> exit will be handled by shell_loop)
 	- Returns -1 if not built-in
 */
 static int	dispatch_builtin(t_shell *shell_data, char **envp)
@@ -33,7 +34,7 @@ static int	dispatch_builtin(t_shell *shell_data, char **envp)
 	if (ft_strncmp(args[0], "env", 4) == 0)
 		return (builtin_env(envp));
 	if (ft_strncmp(args[0], "exit", 5) == 0)
-		return (builtin_exit(shell_data, args));
+		return (builtin_exit(args));
 	return (-1);
 }
 

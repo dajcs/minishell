@@ -6,7 +6,7 @@
 /*   By: anemet <anemet@student.42luxembourg.lu>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/01 14:25:53 by anemet            #+#    #+#             */
-/*   Updated: 2025/08/04 20:23:59 by anemet           ###   ########.fr       */
+/*   Updated: 2025/08/05 09:36:10 by anemet           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,6 +27,7 @@
 # define STDIN_FILENO 0
 # define STDOUT_FILENO 1
 # define STDERR_FILENO 2
+# define EXIT_BUILTIN_CODE 255
 
 /* ----- Enums ----- */
 typedef enum e_redir_type
@@ -117,7 +118,6 @@ int				builtin_echo(char **args);
 int				builtin_cd(char **args);
 int				builtin_pwd(char **args);
 int				builtin_env(char **args);
-int				builtin_exit(t_shell *shell_data, char **args);	// needs shell
-													// to get last_exit_status
+int				builtin_exit(char **args);
 
 #endif
