@@ -6,7 +6,7 @@
 /*   By: anemet <anemet@student.42luxembourg.lu>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/01 14:25:53 by anemet            #+#    #+#             */
-/*   Updated: 2025/08/05 14:21:22 by anemet           ###   ########.fr       */
+/*   Updated: 2025/08/05 18:51:59 by anemet           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,8 @@
 # define MINISHELL_H
 
 /* ----- Includes ----- */
+# define _GNU_SOURCE
+# include <signal.h>			// sig_atomic_t
 # include <sys/wait.h>			// waitpid
 # include <linux/limits.h>		// PATH_MAX 4096
 # include <readline/history.h>
@@ -39,6 +41,9 @@ typedef enum e_redir_type
 	REDIR_HEREDOC = 2,
 	REDIR_APPEND = 3
 }	t_redir_type;
+
+/* ----- Globals ----- */
+extern volatile sig_atomic_t	g_signal_status;
 
 /* ----- Structures ----- */
 
@@ -113,6 +118,9 @@ char			*find_command_path(char *command);
 
 /* src/execution/executor.c */
 int				execute(t_shell *shell_data, char **envp);	// returns exit st.
+
+/* src/execution/signals.c */
+void			signal_handler(int signum);
 
 /* src/execution/redirections.c */
 void			restore_io(int saved_stdin, int saved_stdout);

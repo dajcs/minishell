@@ -6,7 +6,7 @@
 /*   By: anemet <anemet@student.42luxembourg.lu>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/04 18:59:00 by anemet            #+#    #+#             */
-/*   Updated: 2025/08/05 17:58:16 by anemet           ###   ########.fr       */
+/*   Updated: 2025/08/05 20:19:52 by anemet           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,93 +59,6 @@ static int	dispatch_builtin(t_shell *shell_data, char **envp)
 	return (-1);
 }
 
-/* execute_single_command
-	- fork
-	- CHILD PROCESS
-	- find_command_path()
-		- if !path -> write STDERR
-		- if path -> execve
-			execve should not return on success.
-			if failure perror, exit
-
-static void	execute_single_command(t_command *cmd, char **envp)
-{
-	pid_t	pid;
-	char	*path;
-
-	pid = fork();
-	if (pid == -1)
-	{
-		perror("fork");
-		return ;
-	}
-	else if (pid == 0)
-	{
-		path = find_command_path(cmd->cmd_args[0]);
-		if (!path)
-		{
-			write(STDERR_FILENO, "minishell: command not found: ", 30);
-			write(STDERR_FILENO, cmd->cmd_args[0], ft_strlen(cmd->cmd_args[0]));
-			write(STDERR_FILENO, "\n", 1);
-			exit(127);
-		}
-		execve(path, cmd->cmd_args, envp);
-		perror("execve");
-		exit(EXIT_FAILURE);
-	}
-}
-*/
-
-/* execute_external_command()
-	- fork
-	- pid == 0: CHILD PROCESS
-		- handle redirections for child (we don't need to save/restore
-			since this process will be replaced by execve)
-			- exit if redirection fails
-		- find_command_path()
-			- if !path -> write STDERR
-			- if path -> execve
-				execve should not return on success.
-				if failure perror, exit
-	- else: PARENT PROCESS
-		- wait for the child to finish
-		- the rest of status handling done in the main `execute()`
-
-static void	execute_external_command(t_command *cmd, char **envp)
-{
-	pid_t	pid;
-	char	*path;
-	int		status;
-
-	pid = fork();
-	if (pid == -1)
-	{
-		perror("fork");
-		return ;
-	}
-	else if (pid == 0)
-	{
-		if (handle_redirections(cmd, NULL, NULL) == -1)
-			exit(EXIT_FAILURE);
-		path = find_command_path(cmd->cmd_args[0]);
-		if (!path)
-		{
-			write(STDERR_FILENO, "minishell: command not found: ", 30);
-			write(STDERR_FILENO, cmd->cmd_args[0], ft_strlen(cmd->cmd_args[0]));
-			write(STDERR_FILENO, "\n", 1);
-			exit(127);
-		}
-		execve(path, cmd->cmd_args, envp);
-		perror("execve");
-		exit(EXIT_FAILURE);
-	}
-	else
-	{
-		waitpid(pid, &status, 0);
-	}
-}
-*/
-
 /* run_command()
 	Runs ONE command, either a built-in or an external.
 	Designed to be called from within a forked child process.
@@ -181,9 +94,47 @@ static int	run_command(t_command *cmd, t_shell *shell_data, char **envp)
 	exit(EXIT_FAILURE);
 }
 
+/* set_execution_signals()
+	A way to change signal handlers
+	- sa.sa_flags = 0 // No SA_RESTART during execution
+	- sa.sa_handler = SIG_IGN // Parent should ignore
+								// SIGINT and SIGQUIT
+*/
+static void set_execution_signals(void)
+{
+	struct sigaction sa;
+
+	sigemptyset(&sa.sa_mask);
+	sa.sa_flags = 0;
+	sa.sa_handler = SIG_IGN;
+	sigaction(SIGINT, &sa, NULL);
+	sigaction(SIGQUIT, &sa, NULL);
+}
+
+/* set_interactive_signals()
+	A way to reset signal handlers to interactive
+	- Use sigemptyset to make sure the mask is clear
+	- SA_RESTART flag to prevent some functions being interrupted
+	- sa_handler = signal_handler / sigaction SIGINT: set up Ctrl-C handler
+	- sa_handler = SIG_IGN / sigaction SIGQUIT: Ctrl-\ to be ignored
+*/
+void set_interactive_signals(void)
+{
+	struct sigaction sa;
+
+	sigemptyset(&sa.sa_mask);
+	sa.sa_flags = SA_RESTART;
+	sa.sa_handler = signal_handler;
+	sigaction(SIGINT, &sa, NULL);
+	sa.sa_handler = SIG_IGN;
+	sigaction(SIGQUIT, &sa, NULL);
+}
+
+
 /* execute()
 	The main executor.
 	It handles redirections and pipelines of any lenght
+	- set_execution_signals() -> parent to ignore signals Ctrl-C, Ctrl-\
 	- special case: single built-in command (not in pipe)
 		this allows `cd` and `exit` to modify parent shell
 		- return last_exit_status
@@ -221,6 +172,7 @@ int	execute(t_shell *shell_data, char **envp)
 	cmd = shell_data->commands;
 	if (!cmd)
 		return (0);
+	set_execution_signals();
 	if (!cmd->next && is_builtin(cmd->cmd_args[0]))
 	{
 		if (handle_redirections(cmd, &saved_stdin, &saved_stdout) == -1)
@@ -248,6 +200,12 @@ int	execute(t_shell *shell_data, char **envp)
 		}
 		if (last_pid == 0)
 		{
+			struct sigaction sa_child;
+			sigemptyset(&sa_child.sa_mask);
+			sa_child.sa_flags = 0;
+			sa_child.sa_handler = SIG_DFL; // Default action (terminate)
+			sigaction(SIGINT, &sa_child, NULL);
+			sigaction(SIGQUIT, &sa_child, NULL);
 			if (prev_pipe_read_end != -1)
 			{
 				dup2(prev_pipe_read_end, STDIN_FILENO);
@@ -278,59 +236,10 @@ int	execute(t_shell *shell_data, char **envp)
 			final_status = status;
 		}
 	}
+	set_interactive_signals();
 	if (WIFEXITED(final_status))
 		shell_data->last_exit_status = WEXITSTATUS(final_status);
 	else if (WIFSIGNALED(final_status))
 		shell_data->last_exit_status = 128 + WTERMSIG(final_status);
 	return (shell_data->last_exit_status);
 }
-
-/* execute
-	For now handling only one command
-	BUILTINS
-	- redirect the main shell process temporarily
-		- if redir fail -> set last_exit_status failure -> return 1
-	- execute builtin
-	- restore io
-	- set last_exit_status
-	EXTERNAL COMMAND
-	- redirection will be handled inside the child process
-	- set last_exit_status
-
-	int	execute(t_shell *shell_data, char **envp)
-{
-	int			status;
-	t_command	*cmd;
-	int			saved_stdin;
-	int			saved_stdout;
-
-	status = 0;
-	saved_stdin = -1;
-	saved_stdout = -1;
-	cmd = shell_data->commands;
-	if (!cmd || !cmd->cmd_args || !cmd->cmd_args[0])
-		return (0);
-	if (cmd && !cmd->next)
-	{
-		if (is_builtin(cmd->cmd_args[0]))
-		{
-			if (handle_redirections(cmd, &saved_stdin, &saved_stdout) == -1)
-			{
-				shell_data->last_exit_status = 1;
-				return (1);
-			}
-			status = dispatch_builtin(shell_data, envp);
-			restore_io(saved_stdin, saved_stdout);
-			shell_data->last_exit_status = status;
-		}
-		else
-		{
-			execute_external_command(cmd, envp);
-			wait(&status);
-			if (WIFEXITED(status))
-				shell_data->last_exit_status = WEXITSTATUS(status);
-		}
-	}
-	return (shell_data->last_exit_status);
-}
-*/
