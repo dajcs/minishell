@@ -6,7 +6,7 @@
 /*   By: anemet <anemet@student.42luxembourg.lu>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/01 14:25:53 by anemet            #+#    #+#             */
-/*   Updated: 2025/08/05 09:36:10 by anemet           ###   ########.fr       */
+/*   Updated: 2025/08/05 14:21:22 by anemet           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,10 +14,11 @@
 # define MINISHELL_H
 
 /* ----- Includes ----- */
-# include <sys/wait.h>
-# include <linux/limits.h>	// PATH_MAX 4096
+# include <sys/wait.h>			// waitpid
+# include <linux/limits.h>		// PATH_MAX 4096
 # include <readline/history.h>
 # include <readline/readline.h>
+# include <fcntl.h>				// open() and its flags
 # include <stdio.h>
 # include <stdlib.h>
 # include <unistd.h>
@@ -113,7 +114,12 @@ char			*find_command_path(char *command);
 /* src/execution/executor.c */
 int				execute(t_shell *shell_data, char **envp);	// returns exit st.
 
-/* ----- Built-in Functions ----- */
+/* src/execution/redirections.c */
+void			restore_io(int saved_stdin, int saved_stdout);
+int				handle_redirections(t_command *cmd, int *saved_stdin,
+					int *saved_stdout);
+
+/* ----- Built-in Functions (src/builtins) ----- */
 int				builtin_echo(char **args);
 int				builtin_cd(char **args);
 int				builtin_pwd(char **args);
