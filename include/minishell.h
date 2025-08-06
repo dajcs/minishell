@@ -6,7 +6,7 @@
 /*   By: anemet <anemet@student.42luxembourg.lu>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/01 14:25:53 by anemet            #+#    #+#             */
-/*   Updated: 2025/08/05 18:51:59 by anemet           ###   ########.fr       */
+/*   Updated: 2025/08/06 11:54:32 by anemet           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -121,6 +121,9 @@ int				execute(t_shell *shell_data, char **envp);	// returns exit st.
 
 /* src/execution/signals.c */
 void			signal_handler(int signum);
+void			set_interactive_signals(void);
+void			set_execution_signals(void);
+void			set_child_signals(void);
 
 /* src/execution/redirections.c */
 void			restore_io(int saved_stdin, int saved_stdout);

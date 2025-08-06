@@ -6,7 +6,7 @@
 /*   By: anemet <anemet@student.42luxembourg.lu>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/04 18:59:00 by anemet            #+#    #+#             */
-/*   Updated: 2025/08/05 20:19:52 by anemet           ###   ########.fr       */
+/*   Updated: 2025/08/06 11:55:19 by anemet           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -99,10 +99,10 @@ static int	run_command(t_command *cmd, t_shell *shell_data, char **envp)
 	- sa.sa_flags = 0 // No SA_RESTART during execution
 	- sa.sa_handler = SIG_IGN // Parent should ignore
 								// SIGINT and SIGQUIT
-*/
-static void set_execution_signals(void)
+
+static void	set_execution_signals(void)
 {
-	struct sigaction sa;
+	struct sigaction	sa;
 
 	sigemptyset(&sa.sa_mask);
 	sa.sa_flags = 0;
@@ -110,6 +110,7 @@ static void set_execution_signals(void)
 	sigaction(SIGINT, &sa, NULL);
 	sigaction(SIGQUIT, &sa, NULL);
 }
+*/
 
 /* set_interactive_signals()
 	A way to reset signal handlers to interactive
@@ -117,10 +118,10 @@ static void set_execution_signals(void)
 	- SA_RESTART flag to prevent some functions being interrupted
 	- sa_handler = signal_handler / sigaction SIGINT: set up Ctrl-C handler
 	- sa_handler = SIG_IGN / sigaction SIGQUIT: Ctrl-\ to be ignored
-*/
-void set_interactive_signals(void)
+
+void	set_interactive_signals(void)
 {
-	struct sigaction sa;
+	struct sigaction	sa;
 
 	sigemptyset(&sa.sa_mask);
 	sa.sa_flags = SA_RESTART;
@@ -129,7 +130,7 @@ void set_interactive_signals(void)
 	sa.sa_handler = SIG_IGN;
 	sigaction(SIGQUIT, &sa, NULL);
 }
-
+*/
 
 /* execute()
 	The main executor.
@@ -137,7 +138,7 @@ void set_interactive_signals(void)
 	- set_execution_signals() -> parent to ignore signals Ctrl-C, Ctrl-\
 	- special case: single built-in command (not in pipe)
 		this allows `cd` and `exit` to modify parent shell
-		- return last_exit_status
+		- set_interactive_signals() and return last_exit_status
 	while(cmd) PIPELINE EXECUTION LOOP
 	- if(cmd->next) this isn't the last command: create a pipe
 	- fork()
@@ -153,6 +154,12 @@ void set_interactive_signals(void)
 	WAIT for ALL CHILDREN to FINISH
 	- while(wait(NULL) > 0) // ignore intermediate statuses
 	- waitpid(last_pid, &status, 0) // get the exit status of the LAST command
+	- set_interactive_signals()
+	- if "normal" exit (WIFEXITED): set last_exit_status
+	- else if terminated by signal (WIFSIGNALED)
+		- set last_exit_status
+		- if SIGINT (Ctrl-C) print new prompt
+		- else if SIGQUIT (Ctrl-\) print "Quit (core dumped)"
 	- return last_exit_status
 */
 int	execute(t_shell *shell_data, char **envp)
@@ -166,6 +173,7 @@ int	execute(t_shell *shell_data, char **envp)
 	int			saved_stdout;
 	int			final_status;
 	pid_t		exited_pid;
+	int			termsig;
 
 	prev_pipe_read_end = -1;
 	status = 0;
@@ -180,32 +188,20 @@ int	execute(t_shell *shell_data, char **envp)
 		status = dispatch_builtin(shell_data, envp);
 		restore_io(saved_stdin, saved_stdout);
 		shell_data->last_exit_status = status;
+		set_interactive_signals();
 		return (status);
 	}
 	while (cmd)
 	{
 		if (cmd->next)
-		{
 			if (pipe(pipe_fds) == -1)
-			{
-				perror("pipe");
-				return (1);
-			}
-		}
+				return (perror("pipe"), 1);
 		last_pid = fork();
 		if (last_pid == -1)
-		{
-			perror("fork");
-			return (1);
-		}
+			return (perror("fork"), 1);
 		if (last_pid == 0)
 		{
-			struct sigaction sa_child;
-			sigemptyset(&sa_child.sa_mask);
-			sa_child.sa_flags = 0;
-			sa_child.sa_handler = SIG_DFL; // Default action (terminate)
-			sigaction(SIGINT, &sa_child, NULL);
-			sigaction(SIGQUIT, &sa_child, NULL);
+			set_child_signals();
 			if (prev_pipe_read_end != -1)
 			{
 				dup2(prev_pipe_read_end, STDIN_FILENO);
@@ -228,18 +224,23 @@ int	execute(t_shell *shell_data, char **envp)
 		}
 		cmd = cmd->next;
 	}
-	while((exited_pid = wait(&status)) > 0) // loop until wait() returns -1
-											// meaning no more children to wait
+	while ((exited_pid = wait(&status)) > 0) // loop until wait() returns -1
+												// meaning no more children to wait
 	{
 		if (exited_pid == last_pid)
-		{
 			final_status = status;
-		}
 	}
 	set_interactive_signals();
 	if (WIFEXITED(final_status))
 		shell_data->last_exit_status = WEXITSTATUS(final_status);
 	else if (WIFSIGNALED(final_status))
-		shell_data->last_exit_status = 128 + WTERMSIG(final_status);
+	{
+		termsig = WTERMSIG(final_status);
+		shell_data->last_exit_status = 128 + termsig;
+		if (termsig == SIGINT)
+			printf("\n");
+		else if (termsig == SIGQUIT)
+			printf("Quit (core dumped)\n");
+	}
 	return (shell_data->last_exit_status);
 }

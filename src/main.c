@@ -6,7 +6,7 @@
 /*   By: anemet <anemet@student.42luxembourg.lu>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/01 14:34:51 by anemet            #+#    #+#             */
-/*   Updated: 2025/08/05 19:12:35 by anemet           ###   ########.fr       */
+/*   Updated: 2025/08/06 14:20:08 by anemet           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -72,7 +72,10 @@ void	free_loop_resources(t_shell *shell, char *line, char **raw,
 		char **final)
 {
 	if (line)
+	{
 		free(line);
+		line = NULL;
+	}
 	if (raw)
 		free_tokens(raw);
 	if (final)
@@ -88,15 +91,14 @@ void	free_loop_resources(t_shell *shell, char *line, char **raw,
 	WHILE (1)
 	- Reset the signal status before reading a new line
 	- Read input using readline()
-	- if SIGINT (Ctrl-C pressed while readline active)
-		- last_exit_status = 130, printf "\n" -> displays new prompt
-	- Handle Ctrl-D (readline returns NULL -> exit())
+	- if SIGINT (Ctrl-C pressed): set status, new prompt, new loop
+	- if (!line) (Ctrl-D pressed): print "exit", break loop
 	- Add to history if the line is not empty
 	- Tokenize (gets raw tokens with quotes)
 	- Expand and Clean (expands $, removes quotes)
 	- Parse (creates t_command from clean tokens)
 	- launch executor, capture exit_status
-	- if exit_status = EXIT_BUILTIN_CODE: `exit` command has been entered
+	- if exit_status == EXIT_BUILTIN_CODE: `exit` command has been entered
 		- Free all allocated memory and break loop
 	- Free all allocated memory for this cycle, and repeat
 */
@@ -110,39 +112,46 @@ void	shell_loop(char **envp)
 
 	shell_data.commands = NULL;
 	shell_data.last_exit_status = 0;
+	raw_tokens = NULL;
+	final_tokens = NULL;
 	while (1)
 	{
+		set_interactive_signals();
 		g_signal_status = 0;
 		line = readline("minishell> ");
-		if (g_signal_status == SIGINT)
-		{
-			shell_data.last_exit_status = 130;
-			printf("\n");
-		}
 		if (!line)
 		{
+			if (g_signal_status == SIGINT)
+			{
+				shell_data.last_exit_status = 130;
+				printf("\n");
+				free(line);
+				continue;
+			}
 			printf("exit\n");
-			break ;
+			break;
 		}
-		if (line && *line)
-			add_history(line);
-		raw_tokens = tokenize(line);
-		if (raw_tokens)
-			final_tokens = expand_and_clean(raw_tokens,
-					shell_data.last_exit_status);
-		else
-			final_tokens = NULL;
-		if (final_tokens)
-			shell_data.commands = parse(final_tokens);
-		else
-			shell_data.commands = NULL;
-		exit_status = execute(&shell_data, envp);
-		if (exit_status == EXIT_BUILTIN_CODE)
+		if (*line)
 		{
+			add_history(line);
+			raw_tokens = tokenize(line);
+			if (raw_tokens)
+				final_tokens = expand_and_clean(raw_tokens,
+						shell_data.last_exit_status);
+			else
+				final_tokens = NULL;
+			if (final_tokens)
+				shell_data.commands = parse(final_tokens);
+			exit_status = execute(&shell_data, envp);
+			if (exit_status == EXIT_BUILTIN_CODE)
+			{
+				free_loop_resources(&shell_data, line, raw_tokens, final_tokens);
+				break ;
+			}
 			free_loop_resources(&shell_data, line, raw_tokens, final_tokens);
-			break ;
 		}
-		free_loop_resources(&shell_data, line, raw_tokens, final_tokens);
+		else
+			free(line);
 	}
 }
 
@@ -152,7 +161,6 @@ void	shell_loop(char **envp)
 	- SA_RESTART flag to prevent some functions being interrupted
 	- sa_handler = signal_handler / sigaction SIGINT: set up Ctrl-C handler
 	- sa_handler = SIG_IGN / sigaction SIGQUIT: Ctrl-\ to be ignored
-*/
 void	setup_signal_handlers(void)
 {
 	struct sigaction sa;
@@ -164,6 +172,8 @@ void	setup_signal_handlers(void)
 	sa.sa_handler = SIG_IGN;
 	sigaction(SIGQUIT, &sa, NULL);
 }
+*/
+
 
 /* main
 	- set up the initial "interactive" signal handlers
@@ -173,7 +183,7 @@ int	main(int argc, char **argv, char **envp)
 {
 	(void)argc;
 	(void)argv;
-	setup_signal_handlers();
+	// setup_signal_handlers();
 	shell_loop(envp);
 	return (0);
 }
