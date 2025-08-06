@@ -6,7 +6,7 @@
 #    By: anemet <anemet@student.42luxembourg.lu>    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/08/01 14:10:19 by anemet            #+#    #+#              #
-#    Updated: 2025/08/05 18:12:44 by anemet           ###   ########.fr        #
+#    Updated: 2025/08/06 17:52:20 by anemet           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -24,6 +24,7 @@ SRCS = src/main.c \
        src/parsing/parser.c \
 	   src/parsing/parser_utils.c \
        src/parsing/expander.c \
+       src/parsing/env_utils.c \
 	   src/execution/executor.c \
 	   src/execution/signals.c \
 	   src/execution/path_finder.c \
@@ -32,7 +33,10 @@ SRCS = src/main.c \
 	   src/builtins/builtin_pwd.c \
 	   src/builtins/builtin_echo.c \
 	   src/builtins/builtin_cd.c \
-	   src/builtins/builtin_env.c
+	   src/builtins/builtin_env.c \
+	   src/builtins/builtin_unset.c \
+	   src/builtins/builtin_export.c \
+	   src/builtins/builtin_export_set.c
 
 # Object files
 OBJS = $(SRCS:.c=.o)

@@ -6,7 +6,7 @@
 /*   By: anemet <anemet@student.42luxembourg.lu>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/04 18:59:00 by anemet            #+#    #+#             */
-/*   Updated: 2025/08/06 11:55:19 by anemet           ###   ########.fr       */
+/*   Updated: 2025/08/06 17:59:09 by anemet           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,7 +39,7 @@ static int	is_builtin(const char *command)
 		(builtin_exit returns 255 -> exit will be handled by shell_loop)
 	- Returns -1 if not built-in
 */
-static int	dispatch_builtin(t_shell *shell_data, char **envp)
+static int	dispatch_builtin(t_shell *shell_data)
 {
 	char	**args;
 
@@ -53,7 +53,11 @@ static int	dispatch_builtin(t_shell *shell_data, char **envp)
 	if (ft_strncmp(args[0], "pwd", 4) == 0)
 		return (builtin_pwd(args));
 	if (ft_strncmp(args[0], "env", 4) == 0)
-		return (builtin_env(envp));
+		return (builtin_env(shell_data->envp_list));
+	if (ft_strncmp(args[0], "export", 7) == 0)
+		return (builtin_export(shell_data, args));
+	if (ft_strncmp(args[0], "unset", 6) == 0)
+		return (builtin_unset(shell_data, args));
 	if (ft_strncmp(args[0], "exit", 5) == 0)
 		return (builtin_exit(args));
 	return (-1);
@@ -69,7 +73,7 @@ static int	dispatch_builtin(t_shell *shell_data, char **envp)
 		- if !path - write error, exit(127)
 		- execve() -- should not return, if returns perror("execve") / exit(F)
 */
-static int	run_command(t_command *cmd, t_shell *shell_data, char **envp)
+static int	run_command(t_command *cmd, t_shell *shell_data)
 {
 	char	*path;
 	int		status;
@@ -78,7 +82,7 @@ static int	run_command(t_command *cmd, t_shell *shell_data, char **envp)
 		exit(EXIT_FAILURE);
 	if (is_builtin(cmd->cmd_args[0]))
 	{
-		status = dispatch_builtin(shell_data, envp);
+		status = dispatch_builtin(shell_data);
 		exit(status);
 	}
 	path = find_command_path(cmd->cmd_args[0]);
@@ -89,7 +93,7 @@ static int	run_command(t_command *cmd, t_shell *shell_data, char **envp)
 		write(STDERR_FILENO, "\n", 1);
 		exit(127);
 	}
-	execve(path, cmd->cmd_args, envp);
+	execve(path, cmd->cmd_args, shell_data->envp_list);
 	perror("execve");
 	exit(EXIT_FAILURE);
 }
@@ -162,7 +166,7 @@ void	set_interactive_signals(void)
 		- else if SIGQUIT (Ctrl-\) print "Quit (core dumped)"
 	- return last_exit_status
 */
-int	execute(t_shell *shell_data, char **envp)
+int	execute(t_shell *shell_data)
 {
 	t_command	*cmd;
 	int			pipe_fds[2];
@@ -185,7 +189,7 @@ int	execute(t_shell *shell_data, char **envp)
 	{
 		if (handle_redirections(cmd, &saved_stdin, &saved_stdout) == -1)
 			return (1);
-		status = dispatch_builtin(shell_data, envp);
+		status = dispatch_builtin(shell_data);
 		restore_io(saved_stdin, saved_stdout);
 		shell_data->last_exit_status = status;
 		set_interactive_signals();
@@ -213,7 +217,7 @@ int	execute(t_shell *shell_data, char **envp)
 				dup2(pipe_fds[1], STDOUT_FILENO);
 				close(pipe_fds[1]);
 			}
-			run_command(cmd, shell_data, envp);
+			run_command(cmd, shell_data);
 		}
 		if (prev_pipe_read_end != -1)
 			close(prev_pipe_read_end);

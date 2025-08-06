@@ -6,7 +6,7 @@
 /*   By: anemet <anemet@student.42luxembourg.lu>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/01 14:34:51 by anemet            #+#    #+#             */
-/*   Updated: 2025/08/06 14:20:08 by anemet           ###   ########.fr       */
+/*   Updated: 2025/08/06 18:20:27 by anemet           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -102,16 +102,13 @@ void	free_loop_resources(t_shell *shell, char *line, char **raw,
 		- Free all allocated memory and break loop
 	- Free all allocated memory for this cycle, and repeat
 */
-void	shell_loop(char **envp)
+void	shell_loop(t_shell *shell_data)
 {
 	int		exit_status;
 	char	*line;
 	char	**raw_tokens;
 	char	**final_tokens;
-	t_shell	shell_data;
 
-	shell_data.commands = NULL;
-	shell_data.last_exit_status = 0;
 	raw_tokens = NULL;
 	final_tokens = NULL;
 	while (1)
@@ -123,12 +120,11 @@ void	shell_loop(char **envp)
 		{
 			if (g_signal_status == SIGINT)
 			{
-				shell_data.last_exit_status = 130;
+				shell_data->last_exit_status = 130;
 				printf("\n");
 				free(line);
 				continue;
 			}
-			printf("exit\n");
 			break;
 		}
 		if (*line)
@@ -136,19 +132,18 @@ void	shell_loop(char **envp)
 			add_history(line);
 			raw_tokens = tokenize(line);
 			if (raw_tokens)
-				final_tokens = expand_and_clean(raw_tokens,
-						shell_data.last_exit_status);
+				final_tokens = expand_and_clean(raw_tokens, shell_data);
 			else
 				final_tokens = NULL;
 			if (final_tokens)
-				shell_data.commands = parse(final_tokens);
-			exit_status = execute(&shell_data, envp);
+				shell_data->commands = parse(final_tokens);
+			exit_status = execute(shell_data);
 			if (exit_status == EXIT_BUILTIN_CODE)
 			{
-				free_loop_resources(&shell_data, line, raw_tokens, final_tokens);
+				free_loop_resources(shell_data, line, raw_tokens, final_tokens);
 				break ;
 			}
-			free_loop_resources(&shell_data, line, raw_tokens, final_tokens);
+			free_loop_resources(shell_data, line, raw_tokens, final_tokens);
 		}
 		else
 			free(line);
@@ -181,9 +176,16 @@ void	setup_signal_handlers(void)
 */
 int	main(int argc, char **argv, char **envp)
 {
+	t_shell shell_data;
+
 	(void)argc;
 	(void)argv;
-	// setup_signal_handlers();
-	shell_loop(envp);
-	return (0);
+	shell_data.commands = NULL;
+	shell_data.last_exit_status = 0;
+	shell_data.envp_list = duplicate_envp(envp);
+	if (!shell_data.envp_list)
+		return 1;
+	shell_loop(&shell_data);
+	free_tokens(shell_data.envp_list);
+	return (shell_data.last_exit_status);
 }

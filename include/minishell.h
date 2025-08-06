@@ -6,7 +6,7 @@
 /*   By: anemet <anemet@student.42luxembourg.lu>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/01 14:25:53 by anemet            #+#    #+#             */
-/*   Updated: 2025/08/06 11:54:32 by anemet           ###   ########.fr       */
+/*   Updated: 2025/08/06 18:38:57 by anemet           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -69,8 +69,8 @@ typedef struct s_command
 typedef struct s_shell
 {
 	t_command	*commands;
+	char		**envp_list;			// our private modifiable env list
 	int			last_exit_status;
-	// we'll add here more fields later (e.g., environment list)
 }	t_shell;
 
 // t_expand members put in a struct because of 25 lines
@@ -102,7 +102,7 @@ char			*extract_if(const char *s, int *i,
 void			end_varchar(const char *s, int *i);
 
 /* src/parsing/expander.c */
-char			**expand_and_clean(char **tokens, int last_exit_status);
+char			**expand_and_clean(char **tokens, t_shell *shell_data);
 
 /* src/parsing/parser.c */
 t_command		*parse(char **tokens);
@@ -113,11 +113,14 @@ void			free_command_list(t_command *list_head);
 t_command		*handle_pipe(t_command *cmd, t_list **arg_list);
 void			free_command_list(t_command *list);
 
+/* src/parsing/env_utils.c */
+char			**duplicate_envp(char **envp);
+
 /* src/execution/path_finder.c */
 char			*find_command_path(char *command);
 
 /* src/execution/executor.c */
-int				execute(t_shell *shell_data, char **envp);	// returns exit st.
+int				execute(t_shell *shell_data);	// returns exit status
 
 /* src/execution/signals.c */
 void			signal_handler(int signum);
@@ -136,5 +139,9 @@ int				builtin_cd(char **args);
 int				builtin_pwd(char **args);
 int				builtin_env(char **args);
 int				builtin_exit(char **args);
+int				builtin_unset(t_shell *shell, char **args);
+int				builtin_export(t_shell *shell, char **args);
+int				find_var_index(char **envp, char *var_name);
+void			set_env_var(t_shell *shell, char *var_assignment);
 
 #endif

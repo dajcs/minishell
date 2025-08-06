@@ -6,7 +6,7 @@
 /*   By: anemet <anemet@student.42luxembourg.lu>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/02 11:34:10 by anemet            #+#    #+#             */
-/*   Updated: 2025/08/05 15:36:55 by anemet           ###   ########.fr       */
+/*   Updated: 2025/08/06 18:40:11 by anemet           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,14 +18,24 @@
 	- return (ft_strdup(value)); // Return a copy
 	- Return empty string if not found, like bash
 */
-char	*get_env_value(const char *var_name)
+char	*get_env_value(const char *var_name, t_shell *shell_data)
 {
-	char	*value;
+	char	**envp;
+	int		i;
+	int		len;
 
-	value = getenv(var_name);
-	if (value == NULL)
+	i = 0;
+	len = ft_strlen(var_name);
+	envp = shell_data->envp_list;
+	if (!envp || !var_name)
 		return (ft_strdup(""));
-	return (ft_strdup(value));
+	while (envp[i])
+	{
+		if (ft_strncmp(envp[i], var_name, len) == 0 && envp[i][len] == '=')
+			return (ft_strdup(envp[i] + len + 1));
+		i++;
+	}
+	return (ft_strdup(""));
 }
 
 /* expand_once()
@@ -54,7 +64,7 @@ char	*get_env_value(const char *var_name)
 	- free the strings used to create the new_token
 	- a new string is created, the old one must be freed by the caller
 */
-char	*expand_once(char *token, int last_exit_status)
+char	*expand_once(char *token, t_shell *shell_data)
 {
 	t_expand	x;
 
@@ -66,9 +76,9 @@ char	*expand_once(char *token, int last_exit_status)
 	end_varchar(x.dollar, &x.vlen);
 	x.var = ft_substr(x.dollar, 0, x.vlen);
 	if (x.var[0] == '?')
-		x.var_val = ft_itoa(last_exit_status);
+		x.var_val = ft_itoa(shell_data->last_exit_status);
 	else
-		x.var_val = get_env_value(x.var);
+		x.var_val = get_env_value(x.var, shell_data);
 	x.before_var = ft_substr(token, 0, x.dollar - token - 1);
 	x.alen = ft_strlen(x.dollar + ft_strlen(x.var));
 	x.after_var = ft_substr(token, x.dollar - token + ft_strlen(x.var), x.alen);
@@ -99,7 +109,7 @@ char	*expand_once(char *token, int last_exit_status)
 		free the old work string and return the strip string
  4. If there was no quote return the expanded work string.
 */
-static char	*process_single_token(char *token, int last_exit_status)
+static char	*process_single_token(char *token, t_shell *shell_data)
 {
 	char	*work;
 	char	*next;
@@ -110,12 +120,12 @@ static char	*process_single_token(char *token, int last_exit_status)
 	work = ft_strdup(token);
 	if (!work)
 		return (NULL);
-	next = expand_once(work, last_exit_status);
+	next = expand_once(work, shell_data);
 	while (next != work)
 	{
 		free(work);
 		work = next;
-		next = expand_once(work, last_exit_status);
+		next = expand_once(work, shell_data);
 	}
 	if (work[0] == '"')
 	{
@@ -126,7 +136,7 @@ static char	*process_single_token(char *token, int last_exit_status)
 	return ((work));
 }
 
-char	**expand_and_clean(char **tokens, int last_exit_status)
+char	**expand_and_clean(char **tokens, t_shell *shell_data)
 {
 	char	**new_tokens;
 	int		i;
@@ -141,7 +151,7 @@ char	**expand_and_clean(char **tokens, int last_exit_status)
 	i = 0;
 	while (tokens[i])
 	{
-		new_tokens[i] = process_single_token(tokens[i], last_exit_status);
+		new_tokens[i] = process_single_token(tokens[i], shell_data);
 		i++;
 	}
 	new_tokens[i] = NULL;
