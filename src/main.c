@@ -6,7 +6,7 @@
 /*   By: anemet <anemet@student.42luxembourg.lu>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/01 14:34:51 by anemet            #+#    #+#             */
-/*   Updated: 2025/08/06 18:20:27 by anemet           ###   ########.fr       */
+/*   Updated: 2025/08/06 19:04:24 by anemet           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -89,18 +89,21 @@ void	free_loop_resources(t_shell *shell, char *line, char **raw,
 /*
 	- Initialize shell data
 	WHILE (1)
-	- Reset the signal status before reading a new line
+	- set_interactive_signals() before reading a new line
 	- Read input using readline()
-	- if SIGINT (Ctrl-C pressed): set status, new prompt, new loop
-	- if (!line) (Ctrl-D pressed): print "exit", break loop
-	- Add to history if the line is not empty
-	- Tokenize (gets raw tokens with quotes)
-	- Expand and Clean (expands $, removes quotes)
-	- Parse (creates t_command from clean tokens)
-	- launch executor, capture exit_status
-	- if exit_status == EXIT_BUILTIN_CODE: `exit` command has been entered
-		- Free all allocated memory and break loop
-	- Free all allocated memory for this cycle, and repeat
+	- if (!line)
+		- if g_signal_status == SIGINT, new prompt, new loop
+		- otherwise (Ctrl-D pressed): break loop, clear mem, exit
+	- if (*line)
+		- Add to history if the line is not empty
+		- Tokenize (gets raw tokens with quotes)
+		- Expand and Clean (expands $, removes quotes)
+		- Parse (creates t_command from clean tokens)
+		- launch executor, capture exit_status
+		- if exit_status == EXIT_BUILTIN_CODE: `exit` command has been entered
+			- Free all allocated memory and break loop (exit minishell)
+		- Free all allocated memory for this cycle, and repeat
+	- else free(line) - free empty line and new loop
 */
 void	shell_loop(t_shell *shell_data)
 {
@@ -150,29 +153,9 @@ void	shell_loop(t_shell *shell_data)
 	}
 }
 
-/* setup_signal_handlers()
-	Function to set up signal actions
-	- Use sigemptyset to make sure the mask is clear
-	- SA_RESTART flag to prevent some functions being interrupted
-	- sa_handler = signal_handler / sigaction SIGINT: set up Ctrl-C handler
-	- sa_handler = SIG_IGN / sigaction SIGQUIT: Ctrl-\ to be ignored
-void	setup_signal_handlers(void)
-{
-	struct sigaction sa;
-
-	sigemptyset(&sa.sa_mask);
-	sa.sa_flags = SA_RESTART;
-	sa.sa_handler = signal_handler;
-	sigaction(SIGINT, &sa, NULL);
-	sa.sa_handler = SIG_IGN;
-	sigaction(SIGQUIT, &sa, NULL);
-}
-*/
-
-
 /* main
-	- set up the initial "interactive" signal handlers
-	- passing envp to shell_loop
+	- shell_data.envp_list = duplicate_envp()
+	- passing shell_data with our own envp to shell_loop
 */
 int	main(int argc, char **argv, char **envp)
 {
