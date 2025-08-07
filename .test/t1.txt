@@ -28,29 +28,17 @@ Test  22: ✅ pwd
 Test  23: ✅ pwd oi
 Test  24: ✅ export hello
 Test  25: ✅ export HELLO=123
-Test  26: ❌ export A-
-mini exit code = 0
-bash exit code = 1
-mini error = ()
-bash error = ( not a valid identifier)
+Test  26: ✅ export A-
 Test  27: ✅ export HELLO=123 A
-Test  28: ✅ export HELLO="123 A-"
+Test  28: ❌ export HELLO="123 A-"
+mini exit code = 1
+bash exit code = 0
+mini error = ( not a valid identifier)
+bash error = ()
 Test  29: ✅ export hello world
-Test  30: ❌ export HELLO-=123
-mini exit code = 0
-bash exit code = 1
-mini error = ()
-bash error = ( not a valid identifier)
-Test  31: ❌ export =
-mini exit code = 0
-bash exit code = 1
-mini error = ()
-bash error = ( not a valid identifier)
-Test  32: ❌ export 123
-mini exit code = 0
-bash exit code = 1
-mini error = ()
-bash error = ( not a valid identifier)
+Test  30: ✅ export HELLO-=123
+Test  31: ✅ export =
+Test  32: ✅ export 123
 Test  33: ✅ unset
 Test  34: ✅ unset HELLO
 Test  35: ✅ unset HELLO1 HELLO2
@@ -343,5 +331,5 @@ bash error = ( command not found)
 Test 146: ✅⚠️  README.md
 mini error = ( README.md)
 bash error = ( command not found)
-100/146
+103/146
 😭 😭 😭

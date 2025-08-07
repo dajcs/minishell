@@ -6,7 +6,7 @@
 /*   By: anemet <anemet@student.42luxembourg.lu>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/06 15:47:51 by anemet            #+#    #+#             */
-/*   Updated: 2025/08/06 17:19:35 by anemet           ###   ########.fr       */
+/*   Updated: 2025/08/07 19:07:34 by anemet           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -82,9 +82,18 @@ static void	print_exported_vars(char **envp)
 	free_tokens(sorted_env);
 }
 
+static int	export_error(const char *identifier)
+{
+	write(STDERR_FILENO, "minishell: export: `", 20);
+	write(STDERR_FILENO, identifier, ft_strlen(identifier));
+	write(STDERR_FILENO, "': not a valid identifier\n", 26);
+	return (1);
+}
+
 int	builtin_export(t_shell *shell, char **args)
 {
-	int	i;
+	int		i;
+	char	*var_name;
 
 	if (args[1] == NULL)
 	{
@@ -94,10 +103,15 @@ int	builtin_export(t_shell *shell, char **args)
 	i = 1;
 	while (args[i])
 	{
-		if (ft_strchr(args[i], '=') != NULL)
+		var_name = get_var_name(args[i]);
+		if (!var_name || !is_valid_identifier(var_name))
 		{
-			set_env_var(shell, args[i]);
+			free(var_name);
+			return (export_error(args[i]));
 		}
+		else if (ft_strchr(args[i], '='))
+			set_env_var(shell, args[i]);
+		free(var_name);
 		i++;
 	}
 	return (0);

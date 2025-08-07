@@ -6,7 +6,7 @@
 /*   By: anemet <anemet@student.42luxembourg.lu>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/01 14:25:53 by anemet            #+#    #+#             */
-/*   Updated: 2025/08/07 17:15:56 by anemet           ###   ########.fr       */
+/*   Updated: 2025/08/07 19:09:10 by anemet           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -144,5 +144,7 @@ int				builtin_unset(t_shell *shell, char **args);
 int				builtin_export(t_shell *shell, char **args);
 int				find_var_index(char **envp, char *var_name);
 void			set_env_var(t_shell *shell, char *var_assignment);
+int				is_valid_identifier(const char *name);
+char			*get_var_name(const char *assignment);
 
 #endif

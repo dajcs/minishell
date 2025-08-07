@@ -6,7 +6,7 @@
 #    By: anemet <anemet@student.42luxembourg.lu>    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/08/01 14:10:19 by anemet            #+#    #+#              #
-#    Updated: 2025/08/06 17:52:20 by anemet           ###   ########.fr        #
+#    Updated: 2025/08/07 19:09:42 by anemet           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -36,7 +36,8 @@ SRCS = src/main.c \
 	   src/builtins/builtin_env.c \
 	   src/builtins/builtin_unset.c \
 	   src/builtins/builtin_export.c \
-	   src/builtins/builtin_export_set.c
+	   src/builtins/builtin_export_set.c \
+	   src/builtins/builtin_export_utils.c
 
 # Object files
 OBJS = $(SRCS:.c=.o)
