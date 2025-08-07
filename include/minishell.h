@@ -6,7 +6,7 @@
 /*   By: anemet <anemet@student.42luxembourg.lu>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/01 14:25:53 by anemet            #+#    #+#             */
-/*   Updated: 2025/08/06 18:38:57 by anemet           ###   ########.fr       */
+/*   Updated: 2025/08/07 08:51:20 by anemet           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,7 +43,7 @@ typedef enum e_redir_type
 }	t_redir_type;
 
 /* ----- Globals ----- */
-extern volatile sig_atomic_t	g_signal_status;
+// extern volatile sig_atomic_t	g_signal_status;
 
 /* ----- Structures ----- */
 

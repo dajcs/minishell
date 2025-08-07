@@ -6,23 +6,29 @@
 /*   By: anemet <anemet@student.42luxembourg.lu>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/05 18:12:59 by anemet            #+#    #+#             */
-/*   Updated: 2025/08/06 11:51:34 by anemet           ###   ########.fr       */
+/*   Updated: 2025/08/07 08:51:08 by anemet           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
-volatile sig_atomic_t	g_signal_status = 0;
+// volatile sig_atomic_t	g_signal_status = 0;
 
-/* signal_handler()
-	The signal handler.
-	Its only job is to set the global variable to the signal number it received
-	The main loop will then act on this information. This is required to avoid
-	using non-async-signal-safe functions inside the handler.
+/* interactive_signal_handler()
+	Handling signals during the interactive phase (entering command at prompt)
+	- (void)signum; // it's SIGINT <- set @ set_interactive_signals()
+	- write("\n"); // print a newline
+	- rl_on_new_line(); // tell readline that we moved on to a new line
+	- rl_replace_line("", 0); // clear the current buffer in readline
+	- rl_redisplay(); // redisplay the prompt on the new line;
 */
-void	signal_handler(int signum)
+void	interactive_signal_handler(int signum)
 {
-	g_signal_status = signum;
+	(void)signum;
+	write(STDOUT_FILENO, "\n", 1);
+	rl_on_new_line();
+	rl_replace_line("", 0);
+	rl_redisplay();
 }
 
 /* set_interactive_signals()
@@ -37,14 +43,14 @@ void	set_interactive_signals(void)
 
 	sigemptyset(&sa.sa_mask);
 	sa.sa_flags = 0;
-	sa.sa_handler = signal_handler;
+	sa.sa_handler = interactive_signal_handler;
 	sigaction(SIGINT, &sa, NULL);
 	sa.sa_handler = SIG_IGN;
 	sigaction(SIGQUIT, &sa, NULL);
 }
 
 /* set_execution_signals()
-	Configures signals for when the parent shell is executing commands
+	Configures signals for the parent shell when executing the commands
 		and waiting for child processes to finish
 	The parent should not be terminated by signals intended for the child
 	- SIGINT (Ctrl-C): Ignored by the parent

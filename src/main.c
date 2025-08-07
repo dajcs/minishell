@@ -6,7 +6,7 @@
 /*   By: anemet <anemet@student.42luxembourg.lu>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/01 14:34:51 by anemet            #+#    #+#             */
-/*   Updated: 2025/08/06 19:04:24 by anemet           ###   ########.fr       */
+/*   Updated: 2025/08/07 08:43:56 by anemet           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -92,9 +92,8 @@ void	free_loop_resources(t_shell *shell, char *line, char **raw,
 	- set_interactive_signals() before reading a new line
 	- Read input using readline()
 	- if (!line)
-		- if g_signal_status == SIGINT, new prompt, new loop
-		- otherwise (Ctrl-D pressed): break loop, clear mem, exit
-	- if (*line)
+		- (Ctrl-D pressed): break loop, clear memory, exit minishell
+	- if (*line) -> we got a line with content
 		- Add to history if the line is not empty
 		- Tokenize (gets raw tokens with quotes)
 		- Expand and Clean (expands $, removes quotes)
@@ -103,7 +102,7 @@ void	free_loop_resources(t_shell *shell, char *line, char **raw,
 		- if exit_status == EXIT_BUILTIN_CODE: `exit` command has been entered
 			- Free all allocated memory and break loop (exit minishell)
 		- Free all allocated memory for this cycle, and repeat
-	- else free(line) - free empty line and new loop
+	- else free(line) - free empty line "" and new loop
 */
 void	shell_loop(t_shell *shell_data)
 {
@@ -117,19 +116,9 @@ void	shell_loop(t_shell *shell_data)
 	while (1)
 	{
 		set_interactive_signals();
-		g_signal_status = 0;
 		line = readline("minishell> ");
 		if (!line)
-		{
-			if (g_signal_status == SIGINT)
-			{
-				shell_data->last_exit_status = 130;
-				printf("\n");
-				free(line);
-				continue;
-			}
-			break;
-		}
+			break ;
 		if (*line)
 		{
 			add_history(line);
@@ -159,7 +148,7 @@ void	shell_loop(t_shell *shell_data)
 */
 int	main(int argc, char **argv, char **envp)
 {
-	t_shell shell_data;
+	t_shell	shell_data;
 
 	(void)argc;
 	(void)argv;
@@ -167,7 +156,7 @@ int	main(int argc, char **argv, char **envp)
 	shell_data.last_exit_status = 0;
 	shell_data.envp_list = duplicate_envp(envp);
 	if (!shell_data.envp_list)
-		return 1;
+		return (1);
 	shell_loop(&shell_data);
 	free_tokens(shell_data.envp_list);
 	return (shell_data.last_exit_status);
