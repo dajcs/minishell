@@ -6,7 +6,7 @@
 /*   By: anemet <anemet@student.42luxembourg.lu>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/02 11:34:10 by anemet            #+#    #+#             */
-/*   Updated: 2025/08/06 18:40:11 by anemet           ###   ########.fr       */
+/*   Updated: 2025/08/07 15:43:20 by anemet           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,6 +36,26 @@ char	*get_env_value(const char *var_name, t_shell *shell_data)
 		i++;
 	}
 	return (ft_strdup(""));
+}
+
+/* ft_dollar()
+	find pointer of a $ char in *token,
+	valid $ chars are those which are followed
+	by a non-white space and non-quote char
+*/
+static char	*ft_dollar(char *token)
+{
+	char	*ptr;
+
+	ptr = ft_strchr(token, '$');
+	while (ptr)
+	{
+		if (*(++ptr) > 32 && *ptr != '"')
+			return (ptr);
+		else
+			ptr = ft_strchr(ptr, '$');
+	}
+	return (NULL);
 }
 
 /* expand_once()
@@ -68,10 +88,9 @@ char	*expand_once(char *token, t_shell *shell_data)
 {
 	t_expand	x;
 
-	x.dollar = ft_strchr(token, '$');
+	x.dollar = ft_dollar(token);
 	if (!x.dollar)
 		return (token);
-	x.dollar++;
 	x.vlen = 0;
 	end_varchar(x.dollar, &x.vlen);
 	x.var = ft_substr(x.dollar, 0, x.vlen);

@@ -13,3 +13,7 @@ a.out
 # Editor/OS files
 .DS_Store
 *.swp
+
+# minishell tester
+removetests.sh
+minishell_tester

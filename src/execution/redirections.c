@@ -6,7 +6,7 @@
 /*   By: anemet <anemet@student.42luxembourg.lu>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/05 11:38:45 by anemet            #+#    #+#             */
-/*   Updated: 2025/08/05 14:42:26 by anemet           ###   ########.fr       */
+/*   Updated: 2025/08/07 11:10:01 by anemet           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,6 +39,31 @@ static int	handle_heredoc(const char *delimiter)
 	return (pipe_fds[0]);
 }
 
+static int	setup_redirection(t_redir *redir)
+{
+	int	fd;
+
+	if (redir->type == REDIR_INPUT)
+		fd = open(redir->filename, O_RDONLY);
+	else if (redir->type == REDIR_OUTPUT)
+		fd = open(redir->filename, O_WRONLY | O_CREAT | O_TRUNC, 0644);
+	else if (redir->type == REDIR_APPEND)
+		fd = open(redir->filename, O_WRONLY | O_CREAT | O_APPEND, 0644);
+	else
+		fd = handle_heredoc(redir->filename);
+	if (fd == -1)
+	{
+		perror(redir->filename);
+		return (-1);
+	}
+	if (redir->type == REDIR_INPUT || redir->type == REDIR_HEREDOC)
+		dup2(fd, STDIN_FILENO);
+	else
+		dup2(fd, STDOUT_FILENO);
+	close(fd);
+	return (0);
+}
+
 /* handle_redirections()
 	Sets up all I/O redirections for a given command.
 	- If 'saved_stdin' or 'saved_stdout' are not NULL, saves the original FDs
@@ -49,7 +74,6 @@ static int	handle_heredoc(const char *delimiter)
 int	handle_redirections(t_command *cmd, int *saved_stdin, int *saved_stdout)
 {
 	t_redir	*redir;
-	int		fd;
 
 	if (saved_stdin)
 		*saved_stdin = dup(STDIN_FILENO);
@@ -58,28 +82,14 @@ int	handle_redirections(t_command *cmd, int *saved_stdin, int *saved_stdout)
 	redir = cmd->redirections;
 	while (redir)
 	{
-		if (redir->type == REDIR_INPUT)
-			fd = open(redir->filename, O_RDONLY);
-		else if (redir->type == REDIR_OUTPUT)
-			fd = open(redir->filename, O_WRONLY | O_CREAT | O_TRUNC, 0644);
-		else if (redir->type == REDIR_APPEND)
-			fd = open(redir->filename, O_WRONLY | O_CREAT | O_APPEND, 0644);
-		else
-			fd = handle_heredoc(redir->filename);
-		if (fd == -1)
+		if (setup_redirection(redir) == -1)
 		{
-			perror(redir->filename);
 			if (saved_stdin && *saved_stdin != -1)
 				restore_io(*saved_stdin, -1);
 			if (saved_stdout && *saved_stdout != -1)
 				restore_io(-1, *saved_stdout);
 			return (-1);
 		}
-		if (redir->type == REDIR_INPUT || redir->type == REDIR_HEREDOC)
-			dup2(fd, STDIN_FILENO);
-		else
-			dup2(fd, STDOUT_FILENO);
-		close(fd);
 		redir = redir->next;
 	}
 	return (0);

@@ -6,7 +6,7 @@
 /*   By: anemet <anemet@student.42luxembourg.lu>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/04 18:59:00 by anemet            #+#    #+#             */
-/*   Updated: 2025/08/06 17:59:09 by anemet           ###   ########.fr       */
+/*   Updated: 2025/08/07 09:01:15 by anemet           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -139,7 +139,7 @@ void	set_interactive_signals(void)
 /* execute()
 	The main executor.
 	It handles redirections and pipelines of any lenght
-	- set_execution_signals() -> parent to ignore signals Ctrl-C, Ctrl-\
+	- set_execution_signals() -> parent to ignore signals Ctrl-\ and Ctrl-C
 	- special case: single built-in command (not in pipe)
 		this allows `cd` and `exit` to modify parent shell
 		- set_interactive_signals() and return last_exit_status
@@ -229,7 +229,7 @@ int	execute(t_shell *shell_data)
 		cmd = cmd->next;
 	}
 	while ((exited_pid = wait(&status)) > 0) // loop until wait() returns -1
-												// meaning no more children to wait
+											// meaning no more children to wait
 	{
 		if (exited_pid == last_pid)
 			final_status = status;

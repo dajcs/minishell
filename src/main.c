@@ -6,28 +6,29 @@
 /*   By: anemet <anemet@student.42luxembourg.lu>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/01 14:34:51 by anemet            #+#    #+#             */
-/*   Updated: 2025/08/07 08:43:56 by anemet           ###   ########.fr       */
+/*   Updated: 2025/08/07 15:45:48 by anemet           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
-/*
-void	check_tokens(t_shell shell_data)
+void	print_tokens(char **tokens, char *token_type)
 {
 	int	i;
 
+	printf("--- %s ---\n", token_type);
+	printf("---\n");
 	i = 0;
-	while (shell_data.tokens[i])
+	while (tokens[i])
 	{
-		printf("  [%d]: \"%s\"\n", i, shell_data.tokens[i]);
+		printf("  [%d]: \"%s\"\n", i, tokens[i]);
 		i++;
 	}
+	printf("-------------------------------------\n\n");
+
 }
-*/
 
 // --- Helper function for testing ---
-/*
 void	print_command_list(t_command *cmd_list)
 {
 	int		i;
@@ -62,7 +63,6 @@ void	print_command_list(t_command *cmd_list)
 	}
 	printf("---------------------------------\n");
 }
-*/
 
 /* free_loop_resources
 	- free all
@@ -123,12 +123,17 @@ void	shell_loop(t_shell *shell_data)
 		{
 			add_history(line);
 			raw_tokens = tokenize(line);
+			// print_tokens(raw_tokens, "raw_tokens");
 			if (raw_tokens)
 				final_tokens = expand_and_clean(raw_tokens, shell_data);
 			else
 				final_tokens = NULL;
 			if (final_tokens)
+			{
+				// print_tokens(final_tokens, "final_tokens");
 				shell_data->commands = parse(final_tokens);
+				// print_command_list(shell_data->commands);
+			}
 			exit_status = execute(shell_data);
 			if (exit_status == EXIT_BUILTIN_CODE)
 			{
