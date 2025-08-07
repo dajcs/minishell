@@ -12,9 +12,9 @@
 
 #include "minishell.h"
 
-static void remove_var_at_index(t_shell *shell, int var_index)
+static void	remove_var_at_index(t_shell *shell, int var_index)
 {
-	int j;
+	int	j;
 
 	free(shell->envp_list[var_index]);
 	j = var_index;
@@ -26,10 +26,10 @@ static void remove_var_at_index(t_shell *shell, int var_index)
 	shell->envp_list[j] = NULL;
 }
 
-int builtin_unset(t_shell *shell, char **args)
+int	builtin_unset(t_shell *shell, char **args)
 {
-	int i;
-	int var_index;
+	int	i;
+	int	var_index;
 
 	i = 1;
 	while (args[i])
@@ -39,5 +39,5 @@ int builtin_unset(t_shell *shell, char **args)
 			remove_var_at_index(shell, var_index);
 		i++;
 	}
-	return 0;
+	return (0);
 }

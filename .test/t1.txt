@@ -1,4 +1,3 @@
-
 ———————————— builtins
 Test   1: ✅ echo hello world
 Test   2: ✅ echo "hello world"
@@ -20,19 +19,13 @@ Test  13: ✅ echo "> >> < * ? [ ] | ; [ ] || && ( ) & # $  <<"
 Test  14: ✅ echo '> >> < * ? [ ] | ; [ ] || && ( ) & # $  <<'
 Test  15: ✅ echo "exit_code ->$? user ->$USER home -> $HOME"
 Test  16: ✅ echo 'exit_code ->$? user ->$USER home -> $HOME'
-Test  17: ❌ echo "$"
-mini output = ()
-bash output = ($)
+Test  17: ✅ echo "$"
 Test  18: ✅ echo '$'
 Test  19: ✅ echo $
 Test  20: ✅ echo $?
 Test  21: ✅ echo $?HELLO
-Test  22: ❌ pwd
-mini output = (/goinfre/anemet/minishell/minishell_tester)
-bash output = (/home/anemet/goinfre/minishell/minishell_tester)
-Test  23: ❌ pwd oi
-mini output = (/goinfre/anemet/minishell/minishell_tester)
-bash output = (/home/anemet/goinfre/minishell/minishell_tester)
+Test  22: ✅ pwd
+Test  23: ✅ pwd oi
 Test  24: ✅ export hello
 Test  25: ✅ export HELLO=123
 Test  26: ❌ export A-
@@ -350,5 +343,5 @@ bash error = ( command not found)
 Test 146: ✅⚠️  README.md
 mini error = ( README.md)
 bash error = ( command not found)
-97/146
+100/146
 😭 😭 😭

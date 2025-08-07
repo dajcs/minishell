@@ -6,7 +6,7 @@
 /*   By: anemet <anemet@student.42luxembourg.lu>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/04 18:59:00 by anemet            #+#    #+#             */
-/*   Updated: 2025/08/07 09:01:15 by anemet           ###   ########.fr       */
+/*   Updated: 2025/08/07 17:57:18 by anemet           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,9 +49,9 @@ static int	dispatch_builtin(t_shell *shell_data)
 	if (ft_strncmp(args[0], "echo", 5) == 0)
 		return (builtin_echo(args));
 	if (ft_strncmp(args[0], "cd", 3) == 0)
-		return (builtin_cd(args));
+		return (builtin_cd(shell_data, args));
 	if (ft_strncmp(args[0], "pwd", 4) == 0)
-		return (builtin_pwd(args));
+		return (builtin_pwd(shell_data, args));
 	if (ft_strncmp(args[0], "env", 4) == 0)
 		return (builtin_env(shell_data->envp_list));
 	if (ft_strncmp(args[0], "export", 7) == 0)

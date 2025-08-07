@@ -49,15 +49,15 @@ static void	update_existing_var(t_shell *shell, int index, char *new_var)
 
 int	find_var_index(char **envp, char *var_name)
 {
-	int		i;
-	int		len;
+	int	i;
+	int	len;
 
 	i = 0;
 	len = ft_strlen(var_name);
 	while (envp[i])
 	{
 		if (ft_strncmp(envp[i], var_name, len) == 0 && envp[i][len] == '=')
-			return i;
+			return (i);
 		i++;
 	}
 	return (-1);

@@ -6,24 +6,38 @@
 /*   By: anemet <anemet@student.42luxembourg.lu>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/04 20:07:11 by anemet            #+#    #+#             */
-/*   Updated: 2025/08/04 20:25:27 by anemet           ###   ########.fr       */
+/*   Updated: 2025/08/07 16:39:11 by anemet           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
-int	builtin_pwd(char **args)
+/* builtin_pwd()
+	- (void)args; // pwd takes no options
+	- get "PWD" value from envp
+	- if found print, return
+	- otherwise: fallback case getcwd()
+	- if that fails perror, return 1
+*/
+int	builtin_pwd(t_shell *shell, char **args)
 {
-	char	cwd[PATH_MAX];
+	char	*pwd_val;
+	char	cwd_buffer[PATH_MAX];
 
 	(void)args;
-	if (getcwd(cwd, sizeof(cwd)) != NULL)
+	pwd_val = get_env_value("PWD", shell);
+	if (pwd_val)
 	{
-		printf("%s\n", cwd);
+		printf("%s\n", pwd_val);
 		return (0);
 	}
 	else
 	{
+		if (getcwd(cwd_buffer, sizeof(cwd_buffer)) != NULL)
+		{
+			printf("%s\n", cwd_buffer);
+			return (0);
+		}
 		perror("pwd");
 		return (1);
 	}

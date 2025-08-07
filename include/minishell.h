@@ -6,7 +6,7 @@
 /*   By: anemet <anemet@student.42luxembourg.lu>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/01 14:25:53 by anemet            #+#    #+#             */
-/*   Updated: 2025/08/07 08:51:20 by anemet           ###   ########.fr       */
+/*   Updated: 2025/08/07 17:15:56 by anemet           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -102,6 +102,7 @@ char			*extract_if(const char *s, int *i,
 void			end_varchar(const char *s, int *i);
 
 /* src/parsing/expander.c */
+char			*get_env_value(const char *var_name, t_shell *shell_data);
 char			**expand_and_clean(char **tokens, t_shell *shell_data);
 
 /* src/parsing/parser.c */
@@ -135,8 +136,8 @@ int				handle_redirections(t_command *cmd, int *saved_stdin,
 
 /* ----- Built-in Functions (src/builtins) ----- */
 int				builtin_echo(char **args);
-int				builtin_cd(char **args);
-int				builtin_pwd(char **args);
+int				builtin_cd(t_shell *shell, char **args);
+int				builtin_pwd(t_shell *shell, char **args);
 int				builtin_env(char **args);
 int				builtin_exit(char **args);
 int				builtin_unset(t_shell *shell, char **args);
