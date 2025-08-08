@@ -6,7 +6,7 @@
 /*   By: anemet <anemet@student.42luxembourg.lu>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/05 08:14:03 by anemet            #+#    #+#             */
-/*   Updated: 2025/08/07 18:19:25 by anemet           ###   ########.fr       */
+/*   Updated: 2025/08/08 16:36:22 by anemet           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -122,6 +122,11 @@ int	builtin_cd(t_shell *shell, char **args)
 	path = get_cd_path(args, shell);
 	if (!path)
 		return (1);
+	if (args[1] && args[2] != NULL)
+	{
+		write(STDERR_FILENO, "minishell: cd: too many arguments\n", 34);
+		return (1);
+	}
 	old_pwd_val = get_env_value("PWD", shell);
 	if (chdir(path) != 0)
 	{

@@ -1,3 +1,4 @@
+
 ———————————— builtins
 Test   1: ✅ echo hello world
 Test   2: ✅ echo "hello world"
@@ -38,11 +39,7 @@ Test  36: ✅ unset HOME
 Test  37: ✅ unset PATH
 Test  38: ✅ unset SHELL
 Test  39: ✅ cd $PWD
-Test  40: ❌ cd $PWD hi
-mini exit code = 0
-bash exit code = 1
-mini error = ()
-bash error = ( too many arguments)
+Test  40: ✅ cd $PWD hi
 Test  41: ✅ cd 123123
 Test  42: ❌ exit 123
 mini exit code = 255
@@ -292,5 +289,5 @@ bash error = ( command not found)
 Test 146: ✅⚠️  README.md
 mini error = ( README.md)
 bash error = ( command not found)
-108/146
+109/146
 😭 😭 😭
