@@ -6,7 +6,7 @@
 /*   By: anemet <anemet@student.42luxembourg.lu>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/01 14:34:51 by anemet            #+#    #+#             */
-/*   Updated: 2025/08/08 09:11:25 by anemet           ###   ########.fr       */
+/*   Updated: 2025/08/08 17:31:33 by anemet           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,7 +38,7 @@ void	print_command_list(t_command *cmd_list)
 	i = 1;
 	while (cmd_list)
 	{
-		printf("--- Command #%d ---\n", i++);
+		printf("--- cmd #%d ---\n", i++);
 		if (cmd_list->cmd_args)
 		{
 			printf("cmd_args: ");
@@ -53,15 +53,15 @@ void	print_command_list(t_command *cmd_list)
 		redir = cmd_list->redirections;
 		while (redir)
 		{
-			printf("  Redirection: TYPE=%d, FILENAME=%s\n", redir->type,
+			printf("redir   : TYPE=%d, FILENAME=%s\n", redir->type,
 				redir->filename);
 			redir = redir->next;
 		}
 		cmd_list = cmd_list->next;
 		if (cmd_list)
-			printf("  | (pipe to next command)\n");
+			printf("            | (pipe)\n");
 	}
-	printf("---------------------------------\n");
+	printf("\n---------------------------------\n");
 }
 
 /* free_loop_resources
@@ -137,8 +137,9 @@ void	shell_loop(t_shell *shell_data)
 #endif
 			}
 			exit_status = execute(shell_data);
-			if (exit_status == EXIT_BUILTIN_CODE)
+			if (exit_status >= EXIT_BUILTIN_CODE)
 			{
+				shell_data->last_exit_status = exit_status - EXIT_BUILTIN_CODE;
 				free_loop_resources(shell_data, line, raw_tokens, final_tokens);
 				break ;
 			}

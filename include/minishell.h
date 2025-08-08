@@ -6,7 +6,7 @@
 /*   By: anemet <anemet@student.42luxembourg.lu>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/01 14:25:53 by anemet            #+#    #+#             */
-/*   Updated: 2025/08/08 16:15:20 by anemet           ###   ########.fr       */
+/*   Updated: 2025/08/08 17:25:20 by anemet           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,7 +30,7 @@
 # define STDIN_FILENO 0
 # define STDOUT_FILENO 1
 # define STDERR_FILENO 2
-# define EXIT_BUILTIN_CODE 255
+# define EXIT_BUILTIN_CODE 256
 
 /* ----- Enums ----- */
 typedef enum e_redir_type
