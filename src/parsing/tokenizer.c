@@ -6,7 +6,7 @@
 /*   By: anemet <anemet@student.42luxembourg.lu>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/01 15:09:07 by anemet            #+#    #+#             */
-/*   Updated: 2025/08/06 13:56:21 by anemet           ###   ########.fr       */
+/*   Updated: 2025/08/07 22:32:11 by anemet           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,11 +40,11 @@ static int	count_tokens(const char *s)
 			i++;
 		if (s[i])
 			count++;
-		if (!check(&is_quotechar, s, &i))
+		// if (!check(&is_quotechar, s, &i))
 		{
 			if (!check(&is_metachar, s, &i))
-				while (s[i] && !is_space(s[i]) && !is_metachar(s + i)
-					&& !is_quotechar(s + i))
+				while (s[i] && !is_space(s[i]) && !is_metachar(s + i))
+					// && !is_quotechar(s + i))
 					i++;
 		}
 	}
@@ -65,15 +65,15 @@ static char	*extract_tokens(const char *s, int *i)
 
 	while (s[*i] && is_space(s[*i]))
 		(*i)++;
-	token = extract_if(s, i, &is_quotechar);
-	if (!token)
+	// token = extract_if(s, i, &is_quotechar);
+	// if (!token)
 	{
 		token = extract_if(s, i, &is_metachar);
 		if (!token)
 		{
 			j = 0;
-			while (s[*i + j] && !is_space(s[*i + j]) && !is_metachar(s + *i + j)
-				&& !is_quotechar(s + *i + j))
+			while (s[*i + j] && !is_space(s[*i + j]) && !is_metachar(s + *i + j))
+				// && !is_quotechar(s + *i + j))
 				j++;
 			token = ft_substr(s, *i, j);
 			*i += j;
