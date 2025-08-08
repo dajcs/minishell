@@ -6,7 +6,7 @@
 /*   By: anemet <anemet@student.42luxembourg.lu>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/04 18:59:00 by anemet            #+#    #+#             */
-/*   Updated: 2025/08/07 17:57:18 by anemet           ###   ########.fr       */
+/*   Updated: 2025/08/08 19:20:59 by anemet           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,19 +16,19 @@ static int	is_builtin(const char *command)
 {
 	if (!command)
 		return (0);
-	if (ft_strncmp(command, "echo", 5) == 0)
+	if (ft_strcmp(command, "echo") == 0)
 		return (1);
-	if (ft_strncmp(command, "cd", 3) == 0)
+	if (ft_strcmp(command, "cd") == 0)
 		return (1);
-	if (ft_strncmp(command, "pwd", 4) == 0)
+	if (ft_strcmp(command, "pwd") == 0)
 		return (1);
-	if (ft_strncmp(command, "env", 4) == 0)
+	if (ft_strcmp(command, "env") == 0)
 		return (1);
-	if (ft_strncmp(command, "unset", 6) == 0)
+	if (ft_strcmp(command, "unset") == 0)
 		return (1);
-	if (ft_strncmp(command, "export", 7) == 0)
+	if (ft_strcmp(command, "export") == 0)
 		return (1);
-	if (ft_strncmp(command, "exit", 5) == 0)
+	if (ft_strcmp(command, "exit") == 0)
 		return (1);
 	return (0);
 }
@@ -36,7 +36,7 @@ static int	is_builtin(const char *command)
 /* dispatch_builtin()
 	- Checks if the command is a built-in and executes it if so
 		returns the built-in's exit code
-		(builtin_exit returns 255 -> exit will be handled by shell_loop)
+		(builtin_exit returns (256 + xcode) -> exit handled by shell_loop)
 	- Returns -1 if not built-in
 */
 static int	dispatch_builtin(t_shell *shell_data)
@@ -46,19 +46,19 @@ static int	dispatch_builtin(t_shell *shell_data)
 	args = shell_data->commands->cmd_args;
 	if (args == NULL || args[0] == NULL)
 		return (-1);
-	if (ft_strncmp(args[0], "echo", 5) == 0)
+	if (ft_strcmp(args[0], "echo") == 0)
 		return (builtin_echo(args));
-	if (ft_strncmp(args[0], "cd", 3) == 0)
+	if (ft_strcmp(args[0], "cd") == 0)
 		return (builtin_cd(shell_data, args));
-	if (ft_strncmp(args[0], "pwd", 4) == 0)
+	if (ft_strcmp(args[0], "pwd") == 0)
 		return (builtin_pwd(shell_data, args));
-	if (ft_strncmp(args[0], "env", 4) == 0)
+	if (ft_strcmp(args[0], "env") == 0)
 		return (builtin_env(shell_data->envp_list));
-	if (ft_strncmp(args[0], "export", 7) == 0)
+	if (ft_strcmp(args[0], "export") == 0)
 		return (builtin_export(shell_data, args));
-	if (ft_strncmp(args[0], "unset", 6) == 0)
+	if (ft_strcmp(args[0], "unset") == 0)
 		return (builtin_unset(shell_data, args));
-	if (ft_strncmp(args[0], "exit", 5) == 0)
+	if (ft_strcmp(args[0], "exit") == 0)
 		return (builtin_exit(args));
 	return (-1);
 }
@@ -97,44 +97,6 @@ static int	run_command(t_command *cmd, t_shell *shell_data)
 	perror("execve");
 	exit(EXIT_FAILURE);
 }
-
-/* set_execution_signals()
-	A way to change signal handlers
-	- sa.sa_flags = 0 // No SA_RESTART during execution
-	- sa.sa_handler = SIG_IGN // Parent should ignore
-								// SIGINT and SIGQUIT
-
-static void	set_execution_signals(void)
-{
-	struct sigaction	sa;
-
-	sigemptyset(&sa.sa_mask);
-	sa.sa_flags = 0;
-	sa.sa_handler = SIG_IGN;
-	sigaction(SIGINT, &sa, NULL);
-	sigaction(SIGQUIT, &sa, NULL);
-}
-*/
-
-/* set_interactive_signals()
-	A way to reset signal handlers to interactive
-	- Use sigemptyset to make sure the mask is clear
-	- SA_RESTART flag to prevent some functions being interrupted
-	- sa_handler = signal_handler / sigaction SIGINT: set up Ctrl-C handler
-	- sa_handler = SIG_IGN / sigaction SIGQUIT: Ctrl-\ to be ignored
-
-void	set_interactive_signals(void)
-{
-	struct sigaction	sa;
-
-	sigemptyset(&sa.sa_mask);
-	sa.sa_flags = SA_RESTART;
-	sa.sa_handler = signal_handler;
-	sigaction(SIGINT, &sa, NULL);
-	sa.sa_handler = SIG_IGN;
-	sigaction(SIGQUIT, &sa, NULL);
-}
-*/
 
 /* execute()
 	The main executor.
@@ -181,6 +143,7 @@ int	execute(t_shell *shell_data)
 
 	prev_pipe_read_end = -1;
 	status = 0;
+	final_status = 0;
 	cmd = shell_data->commands;
 	if (!cmd)
 		return (0);
@@ -188,7 +151,10 @@ int	execute(t_shell *shell_data)
 	if (!cmd->next && is_builtin(cmd->cmd_args[0]))
 	{
 		if (handle_redirections(cmd, &saved_stdin, &saved_stdout) == -1)
+		{
+			shell_data->last_exit_status = 1;
 			return (1);
+		}
 		status = dispatch_builtin(shell_data);
 		restore_io(saved_stdin, saved_stdout);
 		shell_data->last_exit_status = status;

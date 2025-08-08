@@ -1,4 +1,3 @@
-
 ———————————— builtins
 Test   1: ✅ echo hello world
 Test   2: ✅ echo "hello world"
@@ -66,16 +65,14 @@ Test  61: ✅ echo <"./test_files/infile" "bonjour       42"
 Test  62: ✅ cat <"./test_files/file name with spaces"
 Test  63: ✅ cat <./test_files/infile_big ./test_files/infile
 Test  64: ✅ cat <"1""2""3""4""5"
-Test  65: ❌ echo <"./test_files/infile" <missing <"./test_files/infile"
-mini exit code = 0
-bash exit code = 1
-Test  66: ❌ echo <missing <"./test_files/infile" <missing
-mini exit code = 0
-bash exit code = 1
+Test  65: ✅ echo <"./test_files/infile" <missing <"./test_files/infile"
+Test  66: ✅ echo <missing <"./test_files/infile" <missing
 Test  67: ✅ cat <"./test_files/infile"
 Test  68: ✅ echo <"./test_files/infile_big" | cat <"./test_files/infile"
 Test  69: ✅ echo <"./test_files/infile_big" | cat "./test_files/infile"
-Test  70: ✅ echo <"./test_files/infile_big" | echo <"./test_files/infile"
+Test  70: ✅⚠️  echo <"./test_files/infile_big" | echo <"./test_files/infile"
+mini error = ()
+bash error = ( Broken pipe)
 Test  71: ✅ echo hi | cat <"./test_files/infile"
 Test  72: ✅ echo hi | cat "./test_files/infile"
 Test  73: ❌ cat <"./test_files/infile" | echo hi
@@ -265,5 +262,5 @@ bash error = ( command not found)
 Test 146: ✅⚠️  README.md
 mini error = ( README.md)
 bash error = ( command not found)
-119/146
+121/146
 😭 😭 😭
