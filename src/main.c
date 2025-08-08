@@ -6,7 +6,7 @@
 /*   By: anemet <anemet@student.42luxembourg.lu>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/01 14:34:51 by anemet            #+#    #+#             */
-/*   Updated: 2025/08/07 22:32:51 by anemet           ###   ########.fr       */
+/*   Updated: 2025/08/08 09:11:25 by anemet           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -123,16 +123,18 @@ void	shell_loop(t_shell *shell_data)
 		{
 			add_history(line);
 			raw_tokens = tokenize(line);
-			print_tokens(raw_tokens, "raw_tokens");
 			if (raw_tokens)
 				final_tokens = expand_and_clean(raw_tokens, shell_data);
 			else
 				final_tokens = NULL;
 			if (final_tokens)
 			{
-				print_tokens(final_tokens, "final_tokens");
 				shell_data->commands = parse(final_tokens);
+#ifdef DEBUG
+				print_tokens(raw_tokens, "raw_tokens");
+				print_tokens(final_tokens, "final_tokens");
 				print_command_list(shell_data->commands);
+#endif
 			}
 			exit_status = execute(shell_data);
 			if (exit_status == EXIT_BUILTIN_CODE)

@@ -6,7 +6,7 @@
 #    By: anemet <anemet@student.42luxembourg.lu>    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/08/01 14:10:19 by anemet            #+#    #+#              #
-#    Updated: 2025/08/07 19:09:42 by anemet           ###   ########.fr        #
+#    Updated: 2025/08/08 09:09:34 by anemet           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -16,6 +16,15 @@ NAME = minishell
 # Compiler and flags
 CC = cc
 CFLAGS = -Wall -Wextra -Werror -g
+
+# Default: DEBUG=0 (off)
+DEBUG ?= 0
+
+# make DEBUG=1
+ifeq ($(DEBUG),1)
+  CFLAGS += -DDEBUG
+endif
+
 
 # Source files
 SRCS = src/main.c \
