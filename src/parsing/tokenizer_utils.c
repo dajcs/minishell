@@ -6,7 +6,7 @@
 /*   By: anemet <anemet@student.42luxembourg.lu>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/02 19:13:22 by anemet            #+#    #+#             */
-/*   Updated: 2025/08/03 16:55:53 by anemet           ###   ########.fr       */
+/*   Updated: 2025/08/08 16:14:35 by anemet           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,7 +36,30 @@ int	is_metachar(const char *s)
 // A helper to check for quote_char ' or "
 // Returns the length of the string enclosed in quotes
 // if not quote_char, return 0
-int	is_quotechar(const char *s)
+// int	is_quotechar(const char *s)
+// {
+// 	int		i;
+// 	char	quote_char;
+
+// 	i = 0;
+// 	if (*s == '\'' || *s == '"')
+// 	{
+// 		quote_char = s[0];
+// 		i++;
+// 		while (s[i] && s[i] != quote_char)
+// 			i++;
+// 		if (s[i])
+// 			i++;
+// 	}
+// 	return (i);
+// }
+
+// A helper to check for quote_char ' or "
+// Returns the length of the string enclosed in quotes
+// if closing quote is followed by space or metachar
+// otherwise it keeps iterating i++ until space/metachar/EOS
+// if not quote_char, return 0
+int	is_quotechar_plus(const char *s)
 {
 	int		i;
 	char	quote_char;
@@ -50,6 +73,9 @@ int	is_quotechar(const char *s)
 			i++;
 		if (s[i])
 			i++;
+		if (!is_space(s[i]))
+			while (s[i] && !is_space(s[i]) && !is_metachar(s + i))
+				i++;
 	}
 	return (i);
 }
@@ -87,20 +113,4 @@ char	*extract_if(const char *s, int *i, int (*checker_func)(const char *))
 		*i += len;
 	}
 	return (token);
-}
-
-/* end_varchar
-	- advances *i through the string s over "ordinary" characters
-	- stops when encounters space/$/meta/quote character
-*/
-void	end_varchar(const char *s, int *i)
-{
-	if (s[*i] == '?')
-	{
-		(*i)++;
-		return ;
-	}
-	while (s[*i] && !is_space(s[*i]) && s[*i] != '$'
-		&& !is_metachar(s + *i) && !is_quotechar(s + *i))
-		(*i)++;
 }

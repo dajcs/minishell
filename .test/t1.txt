@@ -2,12 +2,8 @@
 Test   1: ✅ echo hello world
 Test   2: ✅ echo "hello world"
 Test   3: ✅ echo 'hello world'
-Test   4: ❌ echo hello'world'
-mini output = (hello world)
-bash output = (helloworld)
-Test   5: ❌ echo hello""world
-mini output = (hello world)
-bash output = (helloworld)
+Test   4: ✅ echo hello'world'
+Test   5: ✅ echo hello""world
 Test   6: ✅ echo ''
 Test   7: ✅ echo "$PWD"
 Test   8: ✅ echo '$PWD'
@@ -30,11 +26,7 @@ Test  24: ✅ export hello
 Test  25: ✅ export HELLO=123
 Test  26: ✅ export A-
 Test  27: ✅ export HELLO=123 A
-Test  28: ❌ export HELLO="123 A-"
-mini exit code = 1
-bash exit code = 0
-mini error = ( not a valid identifier)
-bash error = ()
+Test  28: ✅ export HELLO="123 A-"
 Test  29: ✅ export hello world
 Test  30: ✅ export HELLO-=123
 Test  31: ✅ export =
@@ -90,11 +82,7 @@ Test  52: ✅
 ———————————— pipes
 Test  53: ✅ env | sort | grep -v SHLVL | grep -v ^_
 Test  54: ✅ cat ./test_files/infile_big | grep oi
-Test  55: ❌ cat minishell.h | grep ");"$
-mini exit code = 2
-bash exit code = 1
-mini error = ( No such file or directory No such file or directory)
-bash error = ( No such file or directory)
+Test  55: ✅ cat minishell.h | grep ");"$
 Test  56: ✅ export GHOST=123 | env | grep GHOST
 ———————————— redirects
 Test  57: ✅ grep hi <./test_files/infile
@@ -151,34 +139,7 @@ bash output = ()
 Test  84: ✅ ls >./outfiles/outfile01 >./outfiles/outfile02
 Test  85: ✅ ls >./outfiles/outfile01 >./test_files/invalid_permission
 Test  86: ✅ ls >"./outfiles/outfile with spaces"
-Test  87: ❌ ls >"./outfiles/outfile""1""2""3""4""5"
-Only in ./mini_outfiles: outfile
-Only in ./bash_outfiles: outfile12345
-mini outfiles:
-bash outfiles:
-bash_outfiles
-bash.supp
-bonus
-bonus_bonus
-builtins
-extras
-local.supp
-loop.out
-manual_tests
-mini_outfiles
-os_specific
-outfiles
-pipes
-README.md
-redirects
-syntax
-tester
-test_files
-wildcards
-mini exit code = 2
-bash exit code = 0
-mini error = ( No such file or directory No such file or directory No such file or directory No such file or directory No such file or directory)
-bash error = ()
+Test  87: ✅ ls >"./outfiles/outfile""1""2""3""4""5"
 Test  88: ✅ ls >"./outfiles/outfile01" >./test_files/invalid_permission >"./outfiles/outfile02"
 Test  89: ✅ ls >./test_files/invalid_permission >"./outfiles/outfile01" >./test_files/invalid_permission
 Test  90: ✅ cat <"./test_files/infile" >"./outfiles/outfile01"
@@ -331,5 +292,5 @@ bash error = ( command not found)
 Test 146: ✅⚠️  README.md
 mini error = ( README.md)
 bash error = ( command not found)
-103/146
+108/146
 😭 😭 😭

@@ -6,15 +6,20 @@
 /*   By: anemet <anemet@student.42luxembourg.lu>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/01 15:09:07 by anemet            #+#    #+#             */
-/*   Updated: 2025/08/07 22:32:11 by anemet           ###   ########.fr       */
+/*   Updated: 2025/08/08 14:10:31 by anemet           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
 /*
-  task : handle spaces and recognize metacharacters and quotations
-  e.g.,: `ls|wc` should be ["ls", "|", "wc"], not ["ls|wc"]
+  task : split on spaces and metacharacters unless inside quote
+         quotechars: `'` `"`
+         metachars : `>` `<` `>>` `<<` `|`
+  e.g.,: `ls|wc`                 ->  [`ls`, `|`, `wc`]
+         `echo hello'world'`     ->  [`echo`, `hello'world'`]
+         `echo hello""world`     ->  [`echo`, `hello""world`]
+         `export HELLO="123 A-"` ->  [`export`, `HELLO="123 A-"`]
 */
 
 /* count_tokens:
@@ -40,13 +45,12 @@ static int	count_tokens(const char *s)
 			i++;
 		if (s[i])
 			count++;
-		// if (!check(&is_quotechar, s, &i))
-		{
-			if (!check(&is_metachar, s, &i))
-				while (s[i] && !is_space(s[i]) && !is_metachar(s + i))
-					// && !is_quotechar(s + i))
-					i++;
-		}
+		if (!check(&is_metachar, s, &i))
+			while (s[i]
+				&& !is_space(s[i])
+				&& !is_metachar(s + i)
+				&& !check(&is_quotechar_plus, s, &i))
+				i++;
 	}
 	return (count);
 }
@@ -65,19 +69,17 @@ static char	*extract_tokens(const char *s, int *i)
 
 	while (s[*i] && is_space(s[*i]))
 		(*i)++;
-	// token = extract_if(s, i, &is_quotechar);
-	// if (!token)
+	token = extract_if(s, i, &is_metachar);
+	if (!token)
 	{
-		token = extract_if(s, i, &is_metachar);
-		if (!token)
-		{
-			j = 0;
-			while (s[*i + j] && !is_space(s[*i + j]) && !is_metachar(s + *i + j))
-				// && !is_quotechar(s + *i + j))
-				j++;
-			token = ft_substr(s, *i, j);
-			*i += j;
-		}
+		j = 0;
+		while (s[*i + j]
+			&& !is_space(s[*i + j])
+			&& !is_metachar(s + *i + j)
+			&& !check(&is_quotechar_plus, s + *i, &j))
+			j++;
+		token = ft_substr(s, *i, j);
+		*i += j;
 	}
 	return (token);
 }

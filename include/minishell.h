@@ -6,7 +6,7 @@
 /*   By: anemet <anemet@student.42luxembourg.lu>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/01 14:25:53 by anemet            #+#    #+#             */
-/*   Updated: 2025/08/07 19:09:10 by anemet           ###   ########.fr       */
+/*   Updated: 2025/08/08 16:15:20 by anemet           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -96,10 +96,10 @@ void			free_tokens(char **tokens);
 /* src/parsing/tokenizer_utils.c */
 int				is_metachar(const char *s);
 int				is_quotechar(const char *s);
+int				is_quotechar_plus(const char *s);
 int				check(int (*checker_func)(const char *), const char *s, int *i);
 char			*extract_if(const char *s, int *i,
 					int (*checker_func)(const char *));
-void			end_varchar(const char *s, int *i);
 
 /* src/parsing/expander.c */
 char			*get_env_value(const char *var_name, t_shell *shell_data);
@@ -124,7 +124,6 @@ char			*find_command_path(char *command);
 int				execute(t_shell *shell_data);	// returns exit status
 
 /* src/execution/signals.c */
-void			signal_handler(int signum);
 void			set_interactive_signals(void);
 void			set_execution_signals(void);
 void			set_child_signals(void);

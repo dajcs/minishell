@@ -6,7 +6,7 @@
 /*   By: anemet <anemet@student.42luxembourg.lu>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/02 11:34:10 by anemet            #+#    #+#             */
-/*   Updated: 2025/08/07 15:43:20 by anemet           ###   ########.fr       */
+/*   Updated: 2025/08/08 16:09:55 by anemet           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,123 +38,90 @@ char	*get_env_value(const char *var_name, t_shell *shell_data)
 	return (ft_strdup(""));
 }
 
-/* ft_dollar()
-	find pointer of a $ char in *token,
-	valid $ chars are those which are followed
-	by a non-white space and non-quote char
+/* handle_variable_expansion()
+   Helper function to handle the expansion of a variable.
+	- It extracts the variable name,
+		gets its value, and appends it to the new token
 */
-static char	*ft_dollar(char *token)
+static void	handle_variable_expansion(char **new_token, int *i, char *token,
+		t_shell *shell_data)
 {
-	char	*ptr;
+	int		j;
+	char	*var_name;
+	char	*var_value;
 
-	ptr = ft_strchr(token, '$');
-	while (ptr)
-	{
-		if (*(++ptr) > 32 && *ptr != '"')
-			return (ptr);
-		else
-			ptr = ft_strchr(ptr, '$');
-	}
-	return (NULL);
-}
-
-/* expand_once()
-	searches the token for $var and expands the first var
-	return the orig token if no vars inside or the new expanded token otherwise
-
-	int		alen;			// length of token after var
-	int		vlen;			// length of var
-	char	*dollar;		// pointer to $ char in a token
-	char	*var;			// var string
-	char	*var_val;		// var expanded to var_val string
-	char	*before_var;	// token string before the $ sign
-	char	*after_var;		// token string after the var
-	char	*tmp_token;		// tmp string: before_val + var_val
-	char	*new_token;		// new_token: before_val + var_val + after_var
-
-	- Scan the string for '$'.
-	- if no '$' then return the original token
-	* When '$' found:
-	- dollar++ to advance pointer after the '$' character
-	- end_varchar() searches the end of var
-							(delimited by space/$/meta/quote and sets vlen)
-	- create var with ft_substr()
-	- get var value using getenv() or the last_exit_status for $?.
-	- Reconstruct the string: [part before $] + [value] + [part after var]
-	- free the strings used to create the new_token
-	- a new string is created, the old one must be freed by the caller
-*/
-char	*expand_once(char *token, t_shell *shell_data)
-{
-	t_expand	x;
-
-	x.dollar = ft_dollar(token);
-	if (!x.dollar)
-		return (token);
-	x.vlen = 0;
-	end_varchar(x.dollar, &x.vlen);
-	x.var = ft_substr(x.dollar, 0, x.vlen);
-	if (x.var[0] == '?')
-		x.var_val = ft_itoa(shell_data->last_exit_status);
+	j = *i + 1;
+	if (token[j] == '?')
+		j++;
 	else
-		x.var_val = get_env_value(x.var, shell_data);
-	x.before_var = ft_substr(token, 0, x.dollar - token - 1);
-	x.alen = ft_strlen(x.dollar + ft_strlen(x.var));
-	x.after_var = ft_substr(token, x.dollar - token + ft_strlen(x.var), x.alen);
-	x.tmp_token = ft_strjoin(x.before_var, x.var_val);
-	x.new_token = ft_strjoin(x.tmp_token, x.after_var);
-	free(x.var);
-	free(x.var_val);
-	free(x.before_var);
-	free(x.after_var);
-	free(x.tmp_token);
-	return (x.new_token);
+		while (ft_isalnum(token[j]) || token[j] == '_')
+			j++;
+	var_name = ft_substr(token, *i + 1, j - (*i + 1));
+	if (ft_strncmp(var_name, "?", 2) == 0)
+		var_value = ft_itoa(shell_data->last_exit_status);
+	else
+		var_value = get_env_value(var_name, shell_data);
+	free(var_name);
+	if (var_value)
+	{
+		*new_token = ft_strjoin(*new_token, var_value);
+		free(var_value);
+	}
+	*i = j - 1;
 }
 
-/*  process_single_token()
-	remove quotes, expand vars and return a new string
+/* process_token_chars()
+   Processes the token character by character to build the new token.
+	- It handles single quotes, double quotes, and variable expansion.
+*/
+static void	process_token_chars(char *token, char **new_token,
+		t_shell *shell_data)
+{
+	int		i;
+	char	in_quote;
 
- 1. Check the first character of the token.
-	- If it's a single quote ('), do NOT expand.
-		return a new substr by removing the outer quotes
- 2. Variable expansion ($):
-	- create a work copy of the token
-	- execute repeatedly expand_once() until
-		no difference between work and next
-		(while always freeing the old work string)
- 3. Quote removal:
-	- After all expansions are done, if the token was quoted, create a new
-		substring strip that omits the first and last characters
-		free the old work string and return the strip string
- 4. If there was no quote return the expanded work string.
+	i = 0;
+	in_quote = 0;
+	while (token[i])
+	{
+		if ((token[i] == '\'' || token[i] == '"') && !in_quote)
+			in_quote = token[i];
+		else if (token[i] == in_quote)
+			in_quote = 0;
+		else if (token[i] == '$' && in_quote != '\'')
+		{
+			if (!token[i + 1] || is_space(token[i + 1]) || token[i + 1] == '"')
+				*new_token = ft_strjoin_char(*new_token, token[i]);
+			else
+				handle_variable_expansion(new_token, &i, token, shell_data);
+		}
+		else
+			*new_token = ft_strjoin_char(*new_token, token[i]);
+		i++;
+	}
+}
+
+/* process_single_token()
+	Replicates bash variable expansion and quote removal for a single token.
+	- Expands variables inside double quotes or unquoted.
+	- Does not expand variables inside single quotes.
+	- Outer quote rules apply for nested quotes.
+	- Removes outer quotes after variable expansion.
+	- Leaves '$' followed by a space or '"' as is.
 */
 static char	*process_single_token(char *token, t_shell *shell_data)
 {
-	char	*work;
-	char	*next;
-	char	*strip;
+	char	*new_token;
 
-	if (token[0] == '\'')
-		return (ft_substr(token, 1, ft_strlen(token) - 2));
-	work = ft_strdup(token);
-	if (!work)
+	new_token = ft_strdup("");
+	if (!new_token)
 		return (NULL);
-	next = expand_once(work, shell_data);
-	while (next != work)
-	{
-		free(work);
-		work = next;
-		next = expand_once(work, shell_data);
-	}
-	if (work[0] == '"')
-	{
-		strip = ft_substr(work, 1, ft_strlen(work) - 2);
-		free(work);
-		return (strip);
-	}
-	return ((work));
+	process_token_chars(token, &new_token, shell_data);
+	return (new_token);
 }
 
+// expands variables in tokens and removes outer quotes
+// returns a new token list **new_tokens
 char	**expand_and_clean(char **tokens, t_shell *shell_data)
 {
 	char	**new_tokens;
