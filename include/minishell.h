@@ -6,7 +6,7 @@
 /*   By: anemet <anemet@student.42luxembourg.lu>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/01 14:25:53 by anemet            #+#    #+#             */
-/*   Updated: 2025/08/09 11:13:57 by anemet           ###   ########.fr       */
+/*   Updated: 2025/08/09 19:52:09 by anemet           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -72,6 +72,7 @@ typedef struct s_shell
 	t_command	*commands;
 	char		**envp_list;			// our private modifiable env list
 	int			last_exit_status;
+	int			debug;					// used to print parsed commands
 }	t_shell;
 
 // t_expand members put in a struct because of 25 lines
@@ -129,8 +130,9 @@ void			set_execution_signals(void);
 void			set_child_signals(void);
 
 /* src/execution/redirections.c */
-// void			restore_io(int saved_stdin, int saved_stdout);
-int				handle_redirections(t_command *cmd);
+void			restore_io(int saved_stdin, int saved_stdout);
+int				handle_redirections(t_command *cmd, int *saved_stdin,
+					int *saved_stdout);
 
 /* ----- Built-in Functions (src/builtins) ----- */
 int				builtin_echo(char **args);

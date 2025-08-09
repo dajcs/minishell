@@ -83,7 +83,13 @@ Test  79: ✅ cat <missing | cat <"./test_files/infile"
 Test  80: ✅ echo <123 <456 hi | echo 42
 Test  81: ✅ ls >./outfiles/outfile01
 Test  82: ✅ ls >         ./outfiles/outfile01
-Test  83: ✅ echo hi >         ./outfiles/outfile01 bye
+Test  83: ❌ echo hi >         ./outfiles/outfile01 bye
+Files ./mini_outfiles/outfile01 and ./bash_outfiles/outfile01 differ
+mini outfiles:
+bash outfiles:
+hi bye
+mini output = (hi bye)
+bash output = ()
 Test  84: ✅ ls >./outfiles/outfile01 >./outfiles/outfile02
 Test  85: ✅ ls >./outfiles/outfile01 >./test_files/invalid_permission
 Test  86: ✅ ls >"./outfiles/outfile with spaces"
@@ -138,16 +144,10 @@ grep: (standard input): binary file matches
 Test 133: ✅⚠️  $PWD
 mini error = ()
 bash error = ( Is a directory)
-grep: (standard input): binary file matches
-Test 134: ❌ $EMPTY
-mini exit code = 126
-bash exit code = 0
-grep: (standard input): binary file matches
+Test 134: ✅ $EMPTY
 Test 135: ❌ $EMPTY echo hi
 mini output = ()
 bash output = (hi)
-mini exit code = 126
-bash exit code = 0
 Test 136: ❌ ./test_files/invalid_permission
 mini exit code = 127
 bash exit code = 126
@@ -185,4 +185,3 @@ Test 146: ✅⚠️  README.md
 mini error = ( README.md)
 bash error = ( command not found)
 143/146
-😭 😭 😭

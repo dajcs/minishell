@@ -6,7 +6,7 @@
 /*   By: anemet <anemet@student.42luxembourg.lu>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/02 10:22:42 by anemet            #+#    #+#             */
-/*   Updated: 2025/08/08 20:03:05 by anemet           ###   ########.fr       */
+/*   Updated: 2025/08/09 18:27:40 by anemet           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -112,7 +112,7 @@ int	process_tokens(char **tokens, t_command *head, t_command **current_cmd,
 			*current_cmd = handle_pipe(*current_cmd, arg_list);
 			i++;
 		}
-		else
+		else 
 		{
 			ft_lstadd_back(arg_list, ft_lstnew(ft_strdup(tokens[i])));
 			i++;

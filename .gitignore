@@ -17,3 +17,4 @@ a.out
 # minishell tester
 removetests.sh
 minishell_tester
+tester

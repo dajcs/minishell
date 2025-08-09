@@ -6,7 +6,7 @@
 /*   By: anemet <anemet@student.42luxembourg.lu>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/04 18:59:00 by anemet            #+#    #+#             */
-/*   Updated: 2025/08/09 11:49:22 by anemet           ###   ########.fr       */
+/*   Updated: 2025/08/09 20:12:28 by anemet           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -110,7 +110,7 @@ static int	run_command(t_command *cmd, t_shell *shell_data)
 	char	*path;
 	int		status;
 
-	if (handle_redirections(cmd) == -1)
+	if (handle_redirections(cmd, NULL, NULL) == -1)
 		exit(EXIT_FAILURE);
 	if (is_builtin(cmd->cmd_args[0]))
 	{
@@ -136,6 +136,9 @@ static int	run_command(t_command *cmd, t_shell *shell_data)
 	The main executor.
 	It handles redirections and pipelines of any length
 	- set_execution_signals() -> parent to ignore signals Ctrl-\ and Ctrl-C
+	- special case: single built-in command (not in pipe)
+		this allows `cd` and `exit` to modify parent shell
+		- set_interactive_signals() and return last_exit_status
 	while(cmd) PIPELINE EXECUTION LOOP
 	- if(cmd->next) this isn't the last command: create a pipe
 	- fork()
@@ -164,6 +167,8 @@ int	execute(t_shell *shell_data)
 	t_command	*cmd;
 	int			pipe_fds[2];
 	int			prev_pipe_read_end;
+	int			saved_stdin;
+	int			saved_stdout;
 	pid_t		last_pid;
 	int			status;
 	int			final_status;
@@ -177,6 +182,19 @@ int	execute(t_shell *shell_data)
 	if (!cmd || !cmd->cmd_args || !cmd->cmd_args[0] || !cmd->cmd_args[0][0])
 		return (0);
 	set_execution_signals();
+	if (!cmd->next && is_builtin(cmd->cmd_args[0]))
+	{
+		if (handle_redirections(cmd, &saved_stdin, &saved_stdout) == -1)
+		{
+			shell_data->last_exit_status = 1;
+			return (1);
+		}
+		status = dispatch_builtin(cmd, shell_data);
+		restore_io(saved_stdin, saved_stdout);
+		shell_data->last_exit_status = status;
+		set_interactive_signals();
+		return (status);
+	}
 	while (cmd)
 	{
 		if (cmd->next)

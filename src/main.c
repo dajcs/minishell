@@ -6,7 +6,7 @@
 /*   By: anemet <anemet@student.42luxembourg.lu>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/01 14:34:51 by anemet            #+#    #+#             */
-/*   Updated: 2025/08/08 17:31:33 by anemet           ###   ########.fr       */
+/*   Updated: 2025/08/09 18:22:52 by anemet           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,7 +24,7 @@ void	print_tokens(char **tokens, char *token_type)
 		printf("  [%d]: \"%s\"\n", i, tokens[i]);
 		i++;
 	}
-	printf("-------------------------------------\n\n");
+	printf("------------------------------\n\n");
 
 }
 
@@ -61,7 +61,7 @@ void	print_command_list(t_command *cmd_list)
 		if (cmd_list)
 			printf("            | (pipe)\n");
 	}
-	printf("\n---------------------------------\n");
+	printf("\n----------------------------------------\n");
 }
 
 /* free_loop_resources
@@ -85,21 +85,21 @@ void	free_loop_resources(t_shell *shell, char *line, char **raw,
 	shell->commands = NULL;
 }
 
-// The main loop of the shell
-/*
+/* shell_loop()
+	The main loop of the shell
 	- Initialize shell data
 	WHILE (1)
 	- set_interactive_signals() before reading a new line
 	- Read input using readline()
 	- if (!line)
-		- (Ctrl-D pressed): break loop, clear memory, exit minishell
+		- (Ctrl-D pressed): break loop, return
 	- if (*line) -> we got a line with content
 		- Add to history if the line is not empty
 		- Tokenize (gets raw tokens with quotes)
 		- Expand and Clean (expands $, removes quotes)
 		- Parse (creates t_command from clean tokens)
-		- launch executor, capture exit_status
-		- if exit_status == EXIT_BUILTIN_CODE: `exit` command has been entered
+		- exit_status = execute(shell_data)
+		- if exit_status >= EXIT_BUILTIN_CODE: `exit` command has been entered
 			- Free all allocated memory and break loop (exit minishell)
 		- Free all allocated memory for this cycle, and repeat
 	- else free(line) - free empty line "" and new loop
@@ -125,18 +125,17 @@ void	shell_loop(t_shell *shell_data)
 			raw_tokens = tokenize(line);
 			if (raw_tokens)
 				final_tokens = expand_and_clean(raw_tokens, shell_data);
-			else
-				final_tokens = NULL;
 			if (final_tokens)
-			{
 				shell_data->commands = parse(final_tokens);
-#ifdef DEBUG
+			if (shell_data->debug)
+			{
 				print_tokens(raw_tokens, "raw_tokens");
 				print_tokens(final_tokens, "final_tokens");
 				print_command_list(shell_data->commands);
-#endif
 			}
 			exit_status = execute(shell_data);
+			if (shell_data->debug)
+				printf("last_exit_status = %d\n", shell_data->last_exit_status);
 			if (exit_status >= EXIT_BUILTIN_CODE)
 			{
 				shell_data->last_exit_status = exit_status - EXIT_BUILTIN_CODE;
@@ -158,8 +157,10 @@ int	main(int argc, char **argv, char **envp)
 {
 	t_shell	shell_data;
 
-	(void)argc;
 	(void)argv;
+	shell_data.debug = 0;
+	if (argc > 1)
+		shell_data.debug = 1;
 	shell_data.commands = NULL;
 	shell_data.last_exit_status = 0;
 	shell_data.envp_list = duplicate_envp(envp);
