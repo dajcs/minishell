@@ -1,3 +1,4 @@
+
 ———————————— builtins
 Test   1: ✅ echo hello world
 Test   2: ✅ echo "hello world"
@@ -145,43 +146,19 @@ Test 133: ✅⚠️  $PWD
 mini error = ()
 bash error = ( Is a directory)
 Test 134: ✅ $EMPTY
-Test 135: ❌ $EMPTY echo hi
-mini output = ()
-bash output = (hi)
-Test 136: ❌ ./test_files/invalid_permission
-mini exit code = 127
-bash exit code = 126
-mini error = ( ./test_files/invalid_permission)
-bash error = ( Permission denied)
-Test 137: ✅⚠️  ./missing.out
-mini error = ( ./missing.out)
-bash error = ( No such file or directory)
-Test 138: ✅⚠️  missing.out
-mini error = ( missing.out)
-bash error = ( command not found)
-Test 139: ✅⚠️  "aaa"
-mini error = ( aaa)
-bash error = ( command not found)
-Test 140: ✅⚠️  test_files
-mini error = ( test_files)
-bash error = ( command not found)
+Test 135: ✅ $EMPTY echo hi
+Test 136: ✅ ./test_files/invalid_permission
+Test 137: ✅ ./missing.out
+Test 138: ✅ missing.out
+Test 139: ✅ "aaa"
+Test 140: ✅ test_files
 grep: (standard input): binary file matches
 Test 141: ✅⚠️  ./test_files
 mini error = ()
 bash error = ( Is a directory)
-Test 142: ✅⚠️  /test_files
-mini error = ( /test_files)
-bash error = ( No such file or directory)
-Test 143: ✅⚠️  minishell.h
-mini error = ( minishell.h)
-bash error = ( command not found)
-Test 144: ✅⚠️  $
-mini error = ( $)
-bash error = ( command not found)
-Test 145: ✅⚠️  $?
-mini error = ( 0)
-bash error = ( command not found)
-Test 146: ✅⚠️  README.md
-mini error = ( README.md)
-bash error = ( command not found)
-143/146
+Test 142: ✅ /test_files
+Test 143: ✅ minishell.h
+Test 144: ✅ $
+Test 145: ✅ $?
+Test 146: ✅ README.md
+145/146

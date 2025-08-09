@@ -6,7 +6,7 @@
 /*   By: anemet <anemet@student.42luxembourg.lu>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/04 18:59:00 by anemet            #+#    #+#             */
-/*   Updated: 2025/08/09 20:12:28 by anemet           ###   ########.fr       */
+/*   Updated: 2025/08/10 01:27:15 by anemet           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -120,9 +120,15 @@ static int	run_command(t_command *cmd, t_shell *shell_data)
 	path = find_command_path(cmd->cmd_args[0]);
 	if (!path)
 	{
-		write(STDERR_FILENO, "minishell: command not found: ", 30);
 		write(STDERR_FILENO, cmd->cmd_args[0], ft_strlen(cmd->cmd_args[0]));
-		write(STDERR_FILENO, "\n", 1);
+		write(STDERR_FILENO, ": command not found\n", 20);
+		exit(127);
+	}
+	if (access(path, F_OK) != 0)
+	{
+		write(STDERR_FILENO, "minishell: ", 11);
+		write(STDERR_FILENO, cmd->cmd_args[0], ft_strlen(cmd->cmd_args[0]));
+		write(STDERR_FILENO, ": No such file or directory\n", 28);
 		exit(127);
 	}
 	cmd_validation(path);
