@@ -84,13 +84,7 @@ Test  79: ✅ cat <missing | cat <"./test_files/infile"
 Test  80: ✅ echo <123 <456 hi | echo 42
 Test  81: ✅ ls >./outfiles/outfile01
 Test  82: ✅ ls >         ./outfiles/outfile01
-Test  83: ❌ echo hi >         ./outfiles/outfile01 bye
-Files ./mini_outfiles/outfile01 and ./bash_outfiles/outfile01 differ
-mini outfiles:
-bash outfiles:
-hi bye
-mini output = (hi bye)
-bash output = ()
+Test  83: ✅ echo hi >         ./outfiles/outfile01 bye
 Test  84: ✅ ls >./outfiles/outfile01 >./outfiles/outfile02
 Test  85: ✅ ls >./outfiles/outfile01 >./test_files/invalid_permission
 Test  86: ✅ ls >"./outfiles/outfile with spaces"
@@ -195,5 +189,5 @@ bash error = ( command not found)
 Test 146: ✅⚠️  README.md
 mini error = ( README.md)
 bash error = ( command not found)
-140/146
+141/146
 😭 😭 😭

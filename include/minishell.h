@@ -6,7 +6,7 @@
 /*   By: anemet <anemet@student.42luxembourg.lu>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/01 14:25:53 by anemet            #+#    #+#             */
-/*   Updated: 2025/08/09 09:48:33 by anemet           ###   ########.fr       */
+/*   Updated: 2025/08/09 10:21:31 by anemet           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -128,9 +128,8 @@ void			set_execution_signals(void);
 void			set_child_signals(void);
 
 /* src/execution/redirections.c */
-void			restore_io(int saved_stdin, int saved_stdout);
-int				handle_redirections(t_command *cmd, int *saved_stdin,
-					int *saved_stdout);
+// void			restore_io(int saved_stdin, int saved_stdout);
+int				handle_redirections(t_command *cmd);
 
 /* ----- Built-in Functions (src/builtins) ----- */
 int				builtin_echo(char **args);
