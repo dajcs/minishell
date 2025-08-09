@@ -6,7 +6,7 @@
 /*   By: anemet <anemet@student.42luxembourg.lu>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/01 14:25:53 by anemet            #+#    #+#             */
-/*   Updated: 2025/08/08 17:25:20 by anemet           ###   ########.fr       */
+/*   Updated: 2025/08/09 09:48:33 by anemet           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -95,7 +95,6 @@ void			free_tokens(char **tokens);
 
 /* src/parsing/tokenizer_utils.c */
 int				is_metachar(const char *s);
-int				is_quotechar(const char *s);
 int				is_quotechar_plus(const char *s);
 int				check(int (*checker_func)(const char *), const char *s, int *i);
 char			*extract_if(const char *s, int *i,

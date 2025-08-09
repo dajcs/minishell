@@ -1,3 +1,4 @@
+
 ———————————— builtins
 Test   1: ✅ echo hello world
 Test   2: ✅ echo "hello world"
@@ -70,33 +71,17 @@ Test  66: ✅ echo <missing <"./test_files/infile" <missing
 Test  67: ✅ cat <"./test_files/infile"
 Test  68: ✅ echo <"./test_files/infile_big" | cat <"./test_files/infile"
 Test  69: ✅ echo <"./test_files/infile_big" | cat "./test_files/infile"
-Test  70: ✅⚠️  echo <"./test_files/infile_big" | echo <"./test_files/infile"
-mini error = ()
-bash error = ( Broken pipe)
+Test  70: ✅ echo <"./test_files/infile_big" | echo <"./test_files/infile"
 Test  71: ✅ echo hi | cat <"./test_files/infile"
 Test  72: ✅ echo hi | cat "./test_files/infile"
-Test  73: ❌ cat <"./test_files/infile" | echo hi
-mini output = ()
-bash output = (hi)
-mini exit code = 255
-bash exit code = 0
+Test  73: ✅ cat <"./test_files/infile" | echo hi
 Test  74: ✅ cat <"./test_files/infile" | grep hello
-Test  75: ❌ cat <"./test_files/infile_big" | echo hi
-mini output = ()
-bash output = (hi)
-mini exit code = 255
-bash exit code = 0
+Test  75: ✅ cat <"./test_files/infile_big" | echo hi
 Test  76: ✅ cat <missing
 Test  77: ✅ cat <missing | cat
-Test  78: ❌ cat <missing | echo oi
-mini output = ()
-bash output = (oi)
-mini exit code = 255
-bash exit code = 0
+Test  78: ✅ cat <missing | echo oi
 Test  79: ✅ cat <missing | cat <"./test_files/infile"
-Test  80: ❌ echo <123 <456 hi | echo 42
-mini output = (hi)
-bash output = (42)
+Test  80: ✅ echo <123 <456 hi | echo 42
 Test  81: ✅ ls >./outfiles/outfile01
 Test  82: ✅ ls >         ./outfiles/outfile01
 Test  83: ❌ echo hi >         ./outfiles/outfile01 bye
@@ -113,41 +98,14 @@ Test  87: ✅ ls >"./outfiles/outfile""1""2""3""4""5"
 Test  88: ✅ ls >"./outfiles/outfile01" >./test_files/invalid_permission >"./outfiles/outfile02"
 Test  89: ✅ ls >./test_files/invalid_permission >"./outfiles/outfile01" >./test_files/invalid_permission
 Test  90: ✅ cat <"./test_files/infile" >"./outfiles/outfile01"
-Test  91: ❌ echo hi >./outfiles/outfile01 | echo bye
-mini output = (hi)
-bash output = (bye)
-Test  92: ❌ echo hi >./outfiles/outfile01 >./outfiles/outfile02 | echo bye
-mini output = (hi)
-bash output = (bye)
-Test  93: ❌ echo hi | echo >./outfiles/outfile01 bye
-Files ./mini_outfiles/outfile01 and ./bash_outfiles/outfile01 differ
-mini outfiles:
-hi
-bash outfiles:
-bye
-Test  94: ❌ echo hi | echo bye >./outfiles/outfile01 >./outfiles/outfile02
-Files ./mini_outfiles/outfile02 and ./bash_outfiles/outfile02 differ
-mini outfiles:
-hi
-bash outfiles:
-bye
-Test  95: ❌ echo hi >./outfiles/outfile01 | echo bye >./outfiles/outfile02
-Files ./mini_outfiles/outfile02 and ./bash_outfiles/outfile02 differ
-mini outfiles:
-hi
-hi
-bash outfiles:
-hi
-bye
-Test  96: ❌ echo hi >./outfiles/outfile01 >./test_files/invalid_permission | echo bye
-mini output = (hi)
-bash output = (bye)
-Test  97: ❌ echo hi >./test_files/invalid_permission | echo bye
-mini output = (hi)
-bash output = (bye)
-Test  98: ❌ echo hi >./test_files/invalid_permission >./outfiles/outfile01 | echo bye
-mini output = (hi)
-bash output = (bye)
+Test  91: ✅ echo hi >./outfiles/outfile01 | echo bye
+Test  92: ✅ echo hi >./outfiles/outfile01 >./outfiles/outfile02 | echo bye
+Test  93: ✅ echo hi | echo >./outfiles/outfile01 bye
+Test  94: ✅ echo hi | echo bye >./outfiles/outfile01 >./outfiles/outfile02
+Test  95: ✅ echo hi >./outfiles/outfile01 | echo bye >./outfiles/outfile02
+Test  96: ✅ echo hi >./outfiles/outfile01 >./test_files/invalid_permission | echo bye
+Test  97: ✅ echo hi >./test_files/invalid_permission | echo bye
+Test  98: ✅ echo hi >./test_files/invalid_permission >./outfiles/outfile01 | echo bye
 Test  99: ✅ echo hi | echo bye >./test_files/invalid_permission
 Test 100: ✅ echo hi | >./outfiles/outfile01 echo bye >./test_files/invalid_permission
 Test 101: ✅ echo hi | echo bye >./test_files/invalid_permission >./outfiles/outfile01
@@ -170,38 +128,13 @@ Test 117: ✅ ls >>./outfiles/outfile01 >>./test_files/invalid_permission
 Test 118: ✅ ls >./outfiles/outfile01 >>./test_files/invalid_permission >>./outfiles/outfile02
 Test 119: ✅ ls <missing >>./test_files/invalid_permission >>./outfiles/outfile02
 Test 120: ✅ ls >>./test_files/invalid_permission >>./outfiles/outfile02 <missing
-Test 121: ❌ echo hi >>./outfiles/outfile01 | echo bye
-mini output = (hi)
-bash output = (bye)
-Test 122: ❌ echo hi >>./outfiles/outfile01 >>./outfiles/outfile02 | echo bye
-mini output = (hi)
-bash output = (bye)
-Test 123: ❌ echo hi | echo >>./outfiles/outfile01 bye
-Files ./mini_outfiles/outfile01 and ./bash_outfiles/outfile01 differ
-mini outfiles:
-hi
-bash outfiles:
-bye
-Test 124: ❌ echo hi | echo bye >>./outfiles/outfile01 >>./outfiles/outfile02
-Files ./mini_outfiles/outfile02 and ./bash_outfiles/outfile02 differ
-mini outfiles:
-hi
-bash outfiles:
-bye
-Test 125: ❌ echo hi >>./outfiles/outfile01 | echo bye >>./outfiles/outfile02
-Files ./mini_outfiles/outfile02 and ./bash_outfiles/outfile02 differ
-mini outfiles:
-hi
-hi
-bash outfiles:
-hi
-bye
-Test 126: ❌ echo hi >>./test_files/invalid_permission | echo bye
-mini output = (hi)
-bash output = (bye)
-Test 127: ❌ echo hi >>./test_files/invalid_permission >./outfiles/outfile01 | echo bye
-mini output = (hi)
-bash output = (bye)
+Test 121: ✅ echo hi >>./outfiles/outfile01 | echo bye
+Test 122: ✅ echo hi >>./outfiles/outfile01 >>./outfiles/outfile02 | echo bye
+Test 123: ✅ echo hi | echo >>./outfiles/outfile01 bye
+Test 124: ✅ echo hi | echo bye >>./outfiles/outfile01 >>./outfiles/outfile02
+Test 125: ✅ echo hi >>./outfiles/outfile01 | echo bye >>./outfiles/outfile02
+Test 126: ✅ echo hi >>./test_files/invalid_permission | echo bye
+Test 127: ✅ echo hi >>./test_files/invalid_permission >./outfiles/outfile01 | echo bye
 Test 128: ✅ echo hi | echo bye >>./test_files/invalid_permission
 Test 129: ✅ echo hi | echo >>./outfiles/outfile01 bye >./test_files/invalid_permission
 Test 130: ✅ cat <minishell.h>./outfiles/outfile
@@ -262,5 +195,5 @@ bash error = ( command not found)
 Test 146: ✅⚠️  README.md
 mini error = ( README.md)
 bash error = ( command not found)
-121/146
+140/146
 😭 😭 😭

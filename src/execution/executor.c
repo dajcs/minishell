@@ -6,7 +6,7 @@
 /*   By: anemet <anemet@student.42luxembourg.lu>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/04 18:59:00 by anemet            #+#    #+#             */
-/*   Updated: 2025/08/08 19:20:59 by anemet           ###   ########.fr       */
+/*   Updated: 2025/08/09 10:07:59 by anemet           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,11 +39,11 @@ static int	is_builtin(const char *command)
 		(builtin_exit returns (256 + xcode) -> exit handled by shell_loop)
 	- Returns -1 if not built-in
 */
-static int	dispatch_builtin(t_shell *shell_data)
+static int	dispatch_builtin(t_command *cmd, t_shell *shell_data)
 {
 	char	**args;
 
-	args = shell_data->commands->cmd_args;
+	args = cmd->cmd_args;
 	if (args == NULL || args[0] == NULL)
 		return (-1);
 	if (ft_strcmp(args[0], "echo") == 0)
@@ -82,7 +82,7 @@ static int	run_command(t_command *cmd, t_shell *shell_data)
 		exit(EXIT_FAILURE);
 	if (is_builtin(cmd->cmd_args[0]))
 	{
-		status = dispatch_builtin(shell_data);
+		status = dispatch_builtin(cmd, shell_data);
 		exit(status);
 	}
 	path = find_command_path(cmd->cmd_args[0]);
@@ -155,7 +155,7 @@ int	execute(t_shell *shell_data)
 			shell_data->last_exit_status = 1;
 			return (1);
 		}
-		status = dispatch_builtin(shell_data);
+		status = dispatch_builtin(cmd, shell_data);
 		restore_io(saved_stdin, saved_stdout);
 		shell_data->last_exit_status = status;
 		set_interactive_signals();
