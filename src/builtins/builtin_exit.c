@@ -12,24 +12,23 @@
 
 #include "minishell.h"
 
-static int no_digits(char *str)
+static int	no_digits(char *str)
 {
 	while (*str)
 	{
 		if (ft_isdigit(*str))
-			return 0;
+			return (0);
 		str++;
 	}
-	return 1;
+	return (1);
 }
-
 
 /* builtin_exit
 	- return our special exit code 256 + atoi(args[1])
 */
 int	builtin_exit(char **args)
 {
-	int xcode;
+	int	xcode;
 
 	if (!args[1])
 		return (EXIT_BUILTIN_CODE);
@@ -44,7 +43,7 @@ int	builtin_exit(char **args)
 	if (args[1] && args[2] != NULL)
 	{
 		write(STDERR_FILENO, "minishell: exit: too many arguments\n", 36);
-		return 1;
+		return (1);
 	}
 	xcode = xcode % 256;
 	return (EXIT_BUILTIN_CODE + xcode);

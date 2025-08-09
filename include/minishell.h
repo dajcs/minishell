@@ -6,7 +6,7 @@
 /*   By: anemet <anemet@student.42luxembourg.lu>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/01 14:25:53 by anemet            #+#    #+#             */
-/*   Updated: 2025/08/09 10:21:31 by anemet           ###   ########.fr       */
+/*   Updated: 2025/08/09 11:13:57 by anemet           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,6 +17,7 @@
 # define _GNU_SOURCE
 # include <signal.h>			// sig_atomic_t
 # include <sys/wait.h>			// waitpid
+# include <sys/stat.h>			// struct stat (path_stat)
 # include <linux/limits.h>		// PATH_MAX 4096
 # include <readline/history.h>
 # include <readline/readline.h>

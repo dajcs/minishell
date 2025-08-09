@@ -6,7 +6,7 @@
 /*   By: anemet <anemet@student.42luxembourg.lu>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/04 18:59:00 by anemet            #+#    #+#             */
-/*   Updated: 2025/08/09 10:26:55 by anemet           ###   ########.fr       */
+/*   Updated: 2025/08/09 11:49:22 by anemet           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -63,6 +63,38 @@ static int	dispatch_builtin(t_command *cmd, t_shell *shell_data)
 	return (-1);
 }
 
+/* cmd_validation()
+	checks if command is a valid executable file
+	- struct stat path_stat - variable holds file metadata
+	- stat(path, &path_stat) - kernel fills out info about the file@path
+	- S_ISDIR(path_stat.st_mode) - returns 1 if directory -> exit(126)
+	- access(path, X_OK) - explicitly check for execute permission
+	- perror(path) -> // perror will print "Permission denied"
+*/
+void	cmd_validation(char *path)
+{
+	struct stat	path_stat;
+
+	if (stat(path, &path_stat) == 0)
+	{
+		if (S_ISDIR(path_stat.st_mode))
+		{
+			write(STDERR_FILENO, "minishell: ", 11);
+			write(STDERR_FILENO, path, ft_strlen(path));
+			write(STDERR_FILENO, ": Is a directory\n", 18);
+			free(path);
+			exit(126);
+		}
+	}
+	if (access(path, X_OK) != 0)
+	{
+		write(STDERR_FILENO, "minishell: ", 11);
+		perror(path);
+		free(path);
+		exit(126);
+	}
+}
+
 /* run_command()
 	Runs ONE command, either a built-in or an external.
 	Designed to be called from within a forked child process.
@@ -93,8 +125,10 @@ static int	run_command(t_command *cmd, t_shell *shell_data)
 		write(STDERR_FILENO, "\n", 1);
 		exit(127);
 	}
+	cmd_validation(path);
 	execve(path, cmd->cmd_args, shell_data->envp_list);
 	perror("execve");
+	free(path);
 	exit(EXIT_FAILURE);
 }
 
@@ -140,7 +174,7 @@ int	execute(t_shell *shell_data)
 	status = 0;
 	final_status = 0;
 	cmd = shell_data->commands;
-	if (!cmd)
+	if (!cmd || !cmd->cmd_args || !cmd->cmd_args[0] || !cmd->cmd_args[0][0])
 		return (0);
 	set_execution_signals();
 	while (cmd)

@@ -1,4 +1,3 @@
-
 ———————————— builtins
 Test   1: ✅ echo hello world
 Test   2: ✅ echo "hello world"
@@ -135,23 +134,20 @@ Test 130: ✅ cat <minishell.h>./outfiles/outfile
 Test 131: ✅ cat <minishell.h|ls
 ———————————— extras
 Test 132: ✅
-Test 133: ❌ $PWD
-mini exit code = 1
-bash exit code = 126
-mini error = ( Permission denied)
+grep: (standard input): binary file matches
+Test 133: ✅⚠️  $PWD
+mini error = ()
 bash error = ( Is a directory)
+grep: (standard input): binary file matches
 Test 134: ❌ $EMPTY
-mini exit code = 1
+mini exit code = 126
 bash exit code = 0
-mini error = ( Permission denied)
-bash error = ()
+grep: (standard input): binary file matches
 Test 135: ❌ $EMPTY echo hi
 mini output = ()
 bash output = (hi)
-mini exit code = 1
+mini exit code = 126
 bash exit code = 0
-mini error = ( Permission denied)
-bash error = ()
 Test 136: ❌ ./test_files/invalid_permission
 mini exit code = 127
 bash exit code = 126
@@ -169,10 +165,9 @@ bash error = ( command not found)
 Test 140: ✅⚠️  test_files
 mini error = ( test_files)
 bash error = ( command not found)
-Test 141: ❌ ./test_files
-mini exit code = 1
-bash exit code = 126
-mini error = ( Permission denied)
+grep: (standard input): binary file matches
+Test 141: ✅⚠️  ./test_files
+mini error = ()
 bash error = ( Is a directory)
 Test 142: ✅⚠️  /test_files
 mini error = ( /test_files)
@@ -189,5 +184,5 @@ bash error = ( command not found)
 Test 146: ✅⚠️  README.md
 mini error = ( README.md)
 bash error = ( command not found)
-141/146
+143/146
 😭 😭 😭
