@@ -6,7 +6,7 @@
 /*   By: anemet <anemet@student.42luxembourg.lu>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/01 14:25:53 by anemet            #+#    #+#             */
-/*   Updated: 2025/08/09 19:52:09 by anemet           ###   ########.fr       */
+/*   Updated: 2025/08/10 16:55:38 by anemet           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -137,6 +137,8 @@ int				handle_redirections(t_command *cmd, int *saved_stdin,
 /* ----- Built-in Functions (src/builtins) ----- */
 int				builtin_echo(char **args);
 int				builtin_cd(t_shell *shell, char **args);
+int				expand_tilde_path(char *dest, const char *src, t_shell *shell);
+int				handle_home_path(char *dest, t_shell *shell);
 int				builtin_pwd(t_shell *shell, char **args);
 int				builtin_env(char **args);
 int				builtin_exit(char **args);

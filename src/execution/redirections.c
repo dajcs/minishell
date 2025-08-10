@@ -6,7 +6,7 @@
 /*   By: anemet <anemet@student.42luxembourg.lu>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/05 11:38:45 by anemet            #+#    #+#             */
-/*   Updated: 2025/08/09 20:05:03 by anemet           ###   ########.fr       */
+/*   Updated: 2025/08/10 09:40:41 by anemet           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,6 +54,7 @@ static int	setup_redirection(t_redir *redir)
 		fd = handle_heredoc(redir->filename);
 	if (fd == -1)
 	{
+		write(STDERR_FILENO, "minishell: ", 11);
 		perror(redir->filename);
 		return (-1);
 	}

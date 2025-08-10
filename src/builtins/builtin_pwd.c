@@ -6,7 +6,7 @@
 /*   By: anemet <anemet@student.42luxembourg.lu>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/04 20:07:11 by anemet            #+#    #+#             */
-/*   Updated: 2025/08/07 16:39:11 by anemet           ###   ########.fr       */
+/*   Updated: 2025/08/10 16:43:08 by anemet           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,6 +29,7 @@ int	builtin_pwd(t_shell *shell, char **args)
 	if (pwd_val)
 	{
 		printf("%s\n", pwd_val);
+		free(pwd_val);
 		return (0);
 	}
 	else

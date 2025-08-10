@@ -6,128 +6,96 @@
 /*   By: anemet <anemet@student.42luxembourg.lu>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/05 08:14:03 by anemet            #+#    #+#             */
-/*   Updated: 2025/08/08 16:36:22 by anemet           ###   ########.fr       */
+/*   Updated: 2025/08/10 16:54:06 by anemet           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
-/* int	builtin_cd(t_shell *shell, char **args)
+/* handle_oldpwd_path()
+	Handles cd with '-' argument (OLDPWD directory).
+*/
+static int	handle_oldpwd_path(char *dest, t_shell *shell)
 {
-	char	*path;
-	char	*old_pwd_val;
-	char	new_pwd_buffer[PATH_MAX];
-	char	*old_pwd_export_str;
-	char	*new_pwd_export_str;
+	char	*env_val;
 
-	path = args[1];
-	if (!path)
+	env_val = get_env_value("OLDPWD", shell);
+	if (!env_val)
 	{
-		path = get_env_value("HOME", shell);
-		if (!path)
-		{
-			write(STDERR_FILENO, "minishell: cd: HOME not set\n", 28);
-			return (1);
-		}
-	}
-	old_pwd_val = get_env_value("PWD", shell);
-	if (chdir(path) != 0)
-	{
-		perror(path);
+		write(STDERR_FILENO, "minishell: cd: OLDPWD not set\n", 30);
 		return (1);
 	}
-	if (getcwd(new_pwd_buffer, sizeof(new_pwd_buffer)) == NULL)
-	{
-		perror("cd: getcwd error");
-		return (1);
-	}
-	old_pwd_export_str = ft_strjoin("OLDPWD=", old_pwd_val);
-	new_pwd_export_str = ft_strjoin("PWD=", new_pwd_buffer);
-	set_env_var(shell, old_pwd_export_str);
-	set_env_var(shell, new_pwd_export_str);
-	free(old_pwd_export_str);
-	free(new_pwd_export_str);
+	ft_strlcpy(dest, env_val, PATH_MAX);
+	free(env_val);
 	return (0);
 }
- */
-/* get_cd_path()
-	Gets the target path for cd command.
-	If no argument provided, uses HOME environment variable.
-	if argument == '-', uses the OLDPWD environment variable.
-*/
-static char	*get_cd_path(char **args, t_shell *shell)
-{
-	char	*path;
 
-	path = args[1];
-	if (!path)
-	{
-		path = get_env_value("HOME", shell);
-		if (!path)
-		{
-			write(STDERR_FILENO, "minishell: cd: HOME not set\n", 28);
-			return (NULL);
-		}
-	}
-	if (strncmp(path, "-", 2) == 0)
-	{
-		path = get_env_value("OLDPWD", shell);
-		if (!path)
-		{
-			write(STDERR_FILENO, "minishell: cd: OLDPWD not set\n", 30);
-			return (NULL);
-		}
-	}
-	return (path);
+/* get_cd_path()
+	Gets the target path for cd command and handles special cases.
+	Returns 0 on success, 1 on error.
+*/
+static int	get_cd_path(char *dest, char **args, t_shell *shell)
+{
+	if (!args[1])
+		return (handle_home_path(dest, shell));
+	if (ft_strncmp(args[1], "-", 2) == 0)
+		return (handle_oldpwd_path(dest, shell));
+	return (expand_tilde_path(dest, args[1], shell));
 }
 
 /* update_pwd_vars()
 	Updates OLDPWD and PWD environment variables.
 */
-static int	update_pwd_vars(t_shell *shell, char *old_pwd_val, char *new_pwd)
+static int	update_pwd_vars(t_shell *shell, const char *old_pwd,
+		const char *new_pwd)
 {
-	char	*old_pwd_export_str;
-	char	*new_pwd_export_str;
+	char	old_pwd_str[PATH_MAX + 8];
+	char	new_pwd_str[PATH_MAX + 5];
 
-	old_pwd_export_str = ft_strjoin("OLDPWD=", old_pwd_val);
-	new_pwd_export_str = ft_strjoin("PWD=", new_pwd);
-	if (!old_pwd_export_str || !new_pwd_export_str)
-	{
-		free(old_pwd_export_str);
-		free(new_pwd_export_str);
-		return (1);
-	}
-	set_env_var(shell, old_pwd_export_str);
-	set_env_var(shell, new_pwd_export_str);
-	free(old_pwd_export_str);
-	free(new_pwd_export_str);
+	ft_strlcpy(old_pwd_str, "OLDPWD=", sizeof(old_pwd_str));
+	ft_strlcat(old_pwd_str, old_pwd, sizeof(old_pwd_str));
+	ft_strlcpy(new_pwd_str, "PWD=", sizeof(new_pwd_str));
+	ft_strlcat(new_pwd_str, new_pwd, sizeof(new_pwd_str));
+	set_env_var(shell, old_pwd_str);
+	set_env_var(shell, new_pwd_str);
 	return (0);
 }
 
+/* prepare_old_pwd()
+	Prepares the old PWD value for later use.
+*/
+static void	prepare_old_pwd(char *old_pwd_buffer, t_shell *shell)
+{
+	char	*old_pwd_val;
+
+	old_pwd_val = get_env_value("PWD", shell);
+	if (old_pwd_val)
+	{
+		ft_strlcpy(old_pwd_buffer, old_pwd_val, PATH_MAX);
+		free(old_pwd_val);
+	}
+	else
+		old_pwd_buffer[0] = '\0';
+}
+
 /* builtin_cd
-	- if no argument: set path to $HOME value
-	- if $HOME not defined: error, return 1
-	- get old_pwd_val: Get the current PWD to save as OLDPWD later
-	- Actually try to change the directory (if not ok, perror, return 1)
-	- get the new PHYSICAL path using getcwd()
-		- if error, perror, return 1 (error, but we did change directory.)
-	- update OLDPWD and PWD, create OLDPWD=value, PWD=value
+	Changes directory with support for HOME, OLDPWD, and tilde expansion.
+	Updates PWD and OLDPWD environment variables.
 */
 int	builtin_cd(t_shell *shell, char **args)
 {
-	char	*path;
-	char	*old_pwd_val;
+	char	path[PATH_MAX];
+	char	old_pwd_buffer[PATH_MAX];
 	char	new_pwd_buffer[PATH_MAX];
 
-	path = get_cd_path(args, shell);
-	if (!path)
-		return (1);
-	if (args[1] && args[2] != NULL)
+	if (args[1] && args[2])
 	{
 		write(STDERR_FILENO, "minishell: cd: too many arguments\n", 34);
 		return (1);
 	}
-	old_pwd_val = get_env_value("PWD", shell);
+	if (get_cd_path(path, args, shell) != 0)
+		return (1);
+	prepare_old_pwd(old_pwd_buffer, shell);
 	if (chdir(path) != 0)
 	{
 		perror(path);
@@ -138,5 +106,5 @@ int	builtin_cd(t_shell *shell, char **args)
 		perror("cd: getcwd error");
 		return (1);
 	}
-	return (update_pwd_vars(shell, old_pwd_val, new_pwd_buffer));
+	return (update_pwd_vars(shell, old_pwd_buffer, new_pwd_buffer));
 }

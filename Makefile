@@ -6,7 +6,7 @@
 #    By: anemet <anemet@student.42luxembourg.lu>    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/08/01 14:10:19 by anemet            #+#    #+#              #
-#    Updated: 2025/08/08 09:09:34 by anemet           ###   ########.fr        #
+#    Updated: 2025/08/10 16:57:15 by anemet           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -42,6 +42,7 @@ SRCS = src/main.c \
 	   src/builtins/builtin_pwd.c \
 	   src/builtins/builtin_echo.c \
 	   src/builtins/builtin_cd.c \
+	   src/builtins/builtin_cd_utils.c \
 	   src/builtins/builtin_env.c \
 	   src/builtins/builtin_unset.c \
 	   src/builtins/builtin_export.c \
