@@ -6,7 +6,7 @@
 /*   By: anemet <anemet@student.42luxembourg.lu>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/04 18:59:00 by anemet            #+#    #+#             */
-/*   Updated: 2025/08/10 01:27:15 by anemet           ###   ########.fr       */
+/*   Updated: 2025/08/10 18:00:48 by anemet           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -117,7 +117,7 @@ static int	run_command(t_command *cmd, t_shell *shell_data)
 		status = dispatch_builtin(cmd, shell_data);
 		exit(status);
 	}
-	path = find_command_path(cmd->cmd_args[0]);
+	path = find_command_path(cmd->cmd_args[0], shell_data);
 	if (!path)
 	{
 		write(STDERR_FILENO, cmd->cmd_args[0], ft_strlen(cmd->cmd_args[0]));

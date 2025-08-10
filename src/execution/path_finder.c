@@ -6,7 +6,7 @@
 /*   By: anemet <anemet@student.42luxembourg.lu>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/04 16:30:09 by anemet            #+#    #+#             */
-/*   Updated: 2025/08/10 01:34:04 by anemet           ###   ########.fr       */
+/*   Updated: 2025/08/10 17:58:42 by anemet           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,10 +34,10 @@ char	*loop_and_check(char **path_dirs, char *command)
 
 /* find_command_path
 	- check if command already has a path (e.g., starts with '/', './' or '../')
-		return ft_strdup(cmd) or NULL otherwise
+		return ft_strdup(cmd)
 	- get PATH and split it
 */
-char	*find_command_path(char *command)
+char	*find_command_path(char *command, t_shell *shell)
 {
 	char	**path_dirs;
 	char	*full_path;
@@ -45,7 +45,7 @@ char	*find_command_path(char *command)
 
 	if (ft_strchr(command, '/'))
 		return (ft_strdup(command));
-	path_var = getenv("PATH");
+	path_var = get_env_value("PATH", shell);
 	if (!path_var)
 		return (NULL);
 	path_dirs = ft_split(path_var, ':');
@@ -53,5 +53,6 @@ char	*find_command_path(char *command)
 		return (NULL);
 	full_path = loop_and_check(path_dirs, command);
 	free_tokens(path_dirs);
+	free(path_var);
 	return (full_path);
 }

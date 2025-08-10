@@ -6,7 +6,7 @@
 /*   By: anemet <anemet@student.42luxembourg.lu>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/02 11:34:10 by anemet            #+#    #+#             */
-/*   Updated: 2025/08/08 16:09:55 by anemet           ###   ########.fr       */
+/*   Updated: 2025/08/10 19:36:59 by anemet           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,6 +49,7 @@ static void	handle_variable_expansion(char **new_token, int *i, char *token,
 	int		j;
 	char	*var_name;
 	char	*var_value;
+	char	*temp;
 
 	j = *i + 1;
 	if (token[j] == '?')
@@ -64,7 +65,9 @@ static void	handle_variable_expansion(char **new_token, int *i, char *token,
 	free(var_name);
 	if (var_value)
 	{
+		temp = *new_token;
 		*new_token = ft_strjoin(*new_token, var_value);
+		free(temp);
 		free(var_value);
 	}
 	*i = j - 1;

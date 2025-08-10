@@ -6,7 +6,7 @@
 /*   By: anemet <anemet@student.42luxembourg.lu>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/01 14:25:53 by anemet            #+#    #+#             */
-/*   Updated: 2025/08/10 16:55:38 by anemet           ###   ########.fr       */
+/*   Updated: 2025/08/10 18:01:14 by anemet           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -119,7 +119,7 @@ void			free_command_list(t_command *list);
 char			**duplicate_envp(char **envp);
 
 /* src/execution/path_finder.c */
-char			*find_command_path(char *command);
+char			*find_command_path(char *command, t_shell *shell);
 
 /* src/execution/executor.c */
 int				execute(t_shell *shell_data);	// returns exit status
