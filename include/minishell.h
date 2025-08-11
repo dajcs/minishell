@@ -6,7 +6,7 @@
 /*   By: anemet <anemet@student.42luxembourg.lu>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/01 14:25:53 by anemet            #+#    #+#             */
-/*   Updated: 2025/08/11 18:31:20 by anemet           ###   ########.fr       */
+/*   Updated: 2025/08/11 19:06:41 by anemet           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -108,6 +108,7 @@ t_command		*handle_pipe(t_command *cmd, t_list **arg_list);
 void			free_command_list(t_command *list);
 
 /* src/parsing/utils.c */
+t_redir_type	get_redir_type(char *token);
 void			print_tokens(char **tokens, char *token_type);
 void			print_command_list(t_command *cmd_list);
 void			pprint(t_shell *shell, char **raw, char **final,

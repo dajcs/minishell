@@ -6,28 +6,11 @@
 /*   By: anemet <anemet@student.42luxembourg.lu>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/02 10:22:42 by anemet            #+#    #+#             */
-/*   Updated: 2025/08/10 00:44:50 by anemet           ###   ########.fr       */
+/*   Updated: 2025/08/11 19:07:03 by anemet           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
-
-/* get_redir_type
-	- return redirection type of the token
-	- or return REDIR_NONE if there is no token, or it is not a redirection
-*/
-t_redir_type	get_redir_type(char *token)
-{
-	if (ft_strncmp(token, "<", 2) == 0)
-		return (REDIR_INPUT);
-	if (ft_strncmp(token, ">", 2) == 0)
-		return (REDIR_OUTPUT);
-	if (ft_strncmp(token, "<<", 3) == 0)
-		return (REDIR_HEREDOC);
-	if (ft_strncmp(token, ">>", 3) == 0)
-		return (REDIR_APPEND);
-	return (REDIR_NONE);
-}
 
 /* create_redirections
 	- allocate memory
@@ -85,12 +68,61 @@ int	handle_redirection(char **tokens, int *i, t_command *cmd)
 	return (1);
 }
 
-/* process_tokens
-	contains the main loop for token processing
-	- check if token is redirection & handle_redirection if it is
-	- check if token is a pipe & handle_pipe if it is
-	- otherwise it's an "ordinary" token, just add it to the arg_list
-*/
+/*
+ * handle_token()
+ *
+ * Processes a single token, identifying and handling it as a redirection,
+	a pipe,
+ * or a regular argument.
+ *
+ * @param tokens       The array of all tokens.
+ * @param i            A pointer to the current index in the tokens array.
+ * @param current_cmd  A pointer to the current command being built.
+
+	* @param arg_list     A pointer to the list of arguments for the current
+	command.
+ * @return             Returns 0 on failure (e.g., redirection error),
+	1 on success.
+ */
+static int	handle_token(char **tokens, int *i, t_command **current_cmd,
+		t_list **arg_list)
+{
+	if (get_redir_type(tokens[*i]) != REDIR_NONE)
+	{
+		if (!handle_redirection(tokens, i, *current_cmd))
+			return (0);
+	}
+	else if (ft_strncmp(tokens[*i], "|", 2) == 0)
+	{
+		*current_cmd = handle_pipe(*current_cmd, arg_list);
+		(*i)++;
+	}
+	else if (*tokens[*i] != '\0')
+	{
+		ft_lstadd_back(arg_list, ft_lstnew(ft_strdup(tokens[*i])));
+		(*i)++;
+	}
+	else
+		(*i)++;
+	return (1);
+}
+
+/*
+ * process_tokens()
+ *
+ * Contains the main loop for token processing. It iterates through the tokens
+ * and uses handle_token() to process each one.
+ *
+ * @param tokens       The array of tokens to process.
+ * @param head         The head of the command list,
+	for freeing in case of an error.
+ * @param current_cmd  A pointer to the current command being built.
+
+	* @param arg_list     A pointer to the list of arguments for the current
+	command.
+ * @return             Returns 0 on failure,
+	1 on successful processing of all tokens.
+ */
 int	process_tokens(char **tokens, t_command *head, t_command **current_cmd,
 		t_list **arg_list)
 {
@@ -99,26 +131,11 @@ int	process_tokens(char **tokens, t_command *head, t_command **current_cmd,
 	i = 0;
 	while (tokens[i])
 	{
-		if (get_redir_type(tokens[i]) != REDIR_NONE)
+		if (!handle_token(tokens, &i, current_cmd, arg_list))
 		{
-			if (!handle_redirection(tokens, &i, *current_cmd))
-			{
-				free_command_list(head);
-				return (0);
-			}
+			free_command_list(head);
+			return (0);
 		}
-		else if (ft_strncmp(tokens[i], "|", 2) == 0)
-		{
-			*current_cmd = handle_pipe(*current_cmd, arg_list);
-			i++;
-		}
-		else if (*tokens[i] != '\0')
-		{
-			ft_lstadd_back(arg_list, ft_lstnew(ft_strdup(tokens[i])));
-			i++;
-		}
-		else
-			i++;
 	}
 	return (1);
 }

@@ -6,11 +6,28 @@
 /*   By: anemet <anemet@student.42luxembourg.lu>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/06 15:17:30 by anemet            #+#    #+#             */
-/*   Updated: 2025/08/11 18:39:25 by anemet           ###   ########.fr       */
+/*   Updated: 2025/08/11 19:05:34 by anemet           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
+
+/* get_redir_type()
+	- return redirection type of the token
+	- or return REDIR_NONE if there is no token, or it is not a redirection
+*/
+t_redir_type	get_redir_type(char *token)
+{
+	if (ft_strncmp(token, "<", 2) == 0)
+		return (REDIR_INPUT);
+	if (ft_strncmp(token, ">", 2) == 0)
+		return (REDIR_OUTPUT);
+	if (ft_strncmp(token, "<<", 3) == 0)
+		return (REDIR_HEREDOC);
+	if (ft_strncmp(token, ">>", 3) == 0)
+		return (REDIR_APPEND);
+	return (REDIR_NONE);
+}
 
 void	print_tokens(char **tokens, char *token_type)
 {
