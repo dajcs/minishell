@@ -6,7 +6,7 @@
 /*   By: anemet <anemet@student.42luxembourg.lu>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/06 15:17:30 by anemet            #+#    #+#             */
-/*   Updated: 2025/08/11 19:05:34 by anemet           ###   ########.fr       */
+/*   Updated: 2025/08/11 20:51:53 by anemet           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,35 +44,42 @@ void	print_tokens(char **tokens, char *token_type)
 	printf("------------------------------\n\n");
 }
 
+// --- Helper function for printing a single command ---
+void	print_single_command(t_command *cmd, int cmd_num)
+{
+	int		j;
+	t_redir	*redir;
+
+	printf("--- cmd #%d ---\n", cmd_num);
+	if (cmd->cmd_args)
+	{
+		printf("cmd_args: ");
+		j = 0;
+		while (cmd->cmd_args[j])
+		{
+			printf("[%s] ", cmd->cmd_args[j]);
+			j++;
+		}
+		printf("\n");
+	}
+	redir = cmd->redirections;
+	while (redir)
+	{
+		printf("redir   : TYPE=%d, FILENAME=%s\n", redir->type,
+			redir->filename);
+		redir = redir->next;
+	}
+}
+
 // --- Helper function for testing ---
 void	print_command_list(t_command *cmd_list)
 {
-	int		i;
-	int		j;
-	t_redir	*redir;
+	int	i;
 
 	i = 1;
 	while (cmd_list)
 	{
-		printf("--- cmd #%d ---\n", i++);
-		if (cmd_list->cmd_args)
-		{
-			printf("cmd_args: ");
-			j = 0;
-			while (cmd_list->cmd_args[j])
-			{
-				printf("[%s] ", cmd_list->cmd_args[j]);
-				j++;
-			}
-			printf("\n");
-		}
-		redir = cmd_list->redirections;
-		while (redir)
-		{
-			printf("redir   : TYPE=%d, FILENAME=%s\n", redir->type,
-				redir->filename);
-			redir = redir->next;
-		}
+		print_single_command(cmd_list, i++);
 		cmd_list = cmd_list->next;
 		if (cmd_list)
 			printf("            | (pipe)\n");
