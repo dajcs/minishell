@@ -25,7 +25,6 @@ void	print_tokens(char **tokens, char *token_type)
 		i++;
 	}
 	printf("------------------------------\n\n");
-
 }
 
 // --- Helper function for testing ---
@@ -64,19 +63,19 @@ void	print_command_list(t_command *cmd_list)
 	printf("----------------------------------------\n\n");
 }
 
-void pprint(t_shell *shell, char **raw, char **final, int exit_status)
+void	pprint(t_shell *shell, char **raw, char **final, int exit_status)
 {
 	if (!shell->debug)
-		return;
+		return ;
 	if (!exit_status)
 	{
-	if (strrchr(shell->debug, 'r'))
-		print_tokens(raw, "raw_tokens");
-	if (strrchr(shell->debug, 'f'))
-		print_tokens(final, "final_tokens");
-	if (strrchr(shell->debug, 'c'))
-		print_command_list(shell->commands);
+		if (strrchr(shell->debug, 'r'))
+			print_tokens(raw, "raw_tokens");
+		if (strrchr(shell->debug, 'f'))
+			print_tokens(final, "final_tokens");
+		if (strrchr(shell->debug, 'c'))
+			print_command_list(shell->commands);
 	}
 	else if (strrchr(shell->debug, 'x'))
-			printf("\nlast_exit_status = %d\n\n", shell->last_exit_status);
+		printf("\nlast_exit_status = %d\n\n", shell->last_exit_status);
 }
