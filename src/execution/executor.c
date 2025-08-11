@@ -6,7 +6,7 @@
 /*   By: anemet <anemet@student.42luxembourg.lu>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/04 18:59:00 by anemet            #+#    #+#             */
-/*   Updated: 2025/08/11 17:05:54 by anemet           ###   ########.fr       */
+/*   Updated: 2025/08/11 21:15:20 by anemet           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -95,28 +95,18 @@ void	cmd_validation(char *path)
 	}
 }
 
-/* run_command()
-	Runs ONE command, either a built-in or an external.
-	Designed to be called from within a forked child process.
-	It handles its own redirections and then executes.
-	- handle redirections / exit if redirection fails
-	- if builtin execute it and exit child with its status
-	- else (external command -- this part never returns on success)
-		- if !path - write error, exit(127)
-		- execve() -- should not return, if returns perror("execve") / exit(F)
+/*  execute_external_cmd()
+	Finds and runs an external command. This function does not return on success.
+	- Finds the command's full path.
+	- Performs checks for command existence and validity.
+	- Handles errors by printing to STDERR and exiting with the appropriate code.
+	- Calls execve() to replace the current process with the new command.
+	- If execve() returns, it's an error; prints it and exits.
 */
-static int	run_command(t_command *cmd, t_shell *shell_data)
+static void	execute_external_cmd(t_command *cmd, t_shell *shell_data)
 {
 	char	*path;
-	int		status;
 
-	if (handle_redirections(cmd, NULL, NULL) == -1)
-		exit(EXIT_FAILURE);
-	if (is_builtin(cmd->cmd_args[0]))
-	{
-		status = dispatch_builtin(cmd, shell_data);
-		exit(status);
-	}
 	path = find_command_path(cmd->cmd_args[0], shell_data);
 	if (!path)
 	{
@@ -138,13 +128,38 @@ static int	run_command(t_command *cmd, t_shell *shell_data)
 	exit(EXIT_FAILURE);
 }
 
+/* run_command()
+	Runs a single command from within a forked child process.
+	- Handles I/O redirections for the command; exits if they fail.
+	- Checks if the command is a built-in. If so, it executes it and exits
+		with the built-in's status code.
+	- If it's not a built-in, it calls a helper function to handle
+		the execution of the external command.
+	- return (EXIT_FAILURE)  // This line is unreachable
+*/
+static int	run_command(t_command *cmd, t_shell *shell_data)
+{
+	int		status;
+
+	if (handle_redirections(cmd, NULL, NULL) == -1)
+		exit(EXIT_FAILURE);
+	if (is_builtin(cmd->cmd_args[0]))
+	{
+		status = dispatch_builtin(cmd, shell_data);
+		exit(status);
+	}
+	execute_external_cmd(cmd, shell_data);
+	return (EXIT_FAILURE);
+}
+
 /* execute()
 	The main executor.
 	It handles redirections and pipelines of any length
+	- process_heredocs() collects inputs for all cmd's heredocs
 	- set_execution_signals() -> parent to ignore signals Ctrl-\ and Ctrl-C
 	- special case: single built-in command (not in pipe)
-		this allows `cd` and `exit` to modify parent shell
-		- set_interactive_signals() and return last_exit_status
+		this allows `cd`, `exit`, `export`, `unset`,... to modify parent shell
+		- set_interactive_signals(), clean heredocs and return last_exit_status
 	while(cmd) PIPELINE EXECUTION LOOP
 	- if(cmd->next) this isn't the last command: create a pipe
 	- fork()
@@ -241,7 +256,7 @@ int	execute(t_shell *shell_data)
 		}
 		cmd = cmd->next;
 	}
-	while ((exited_pid = wait(&status)) > 0) // wait() returns -1 -> no child
+	while ((exited_pid = wait(&status)) > 0)
 	{
 		if (exited_pid == last_pid)
 			final_status = status;
