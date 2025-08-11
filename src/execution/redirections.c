@@ -6,39 +6,11 @@
 /*   By: anemet <anemet@student.42luxembourg.lu>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/05 11:38:45 by anemet            #+#    #+#             */
-/*   Updated: 2025/08/11 09:51:48 by anemet           ###   ########.fr       */
+/*   Updated: 2025/08/11 16:31:48 by anemet           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
-
-static int	handle_heredoc(const char *delimiter)
-{
-	int		pipe_fds[2];
-	char	*line;
-
-	if (pipe(pipe_fds) == -1)
-	{
-		perror("pipe");
-		return (-1);
-	}
-	while (1)
-	{
-		line = readline("> ");
-		if (!line || ft_strcmp(line, delimiter) == 0)
-		{
-			if (line)
-				free(line);
-			break ;
-		}
-		write(pipe_fds[1], line, ft_strlen(line));
-		write(pipe_fds[1], "\n", 1);
-		free(line);
-	}
-	close(pipe_fds[1]);
-	return (pipe_fds[0]);
-}
-
 
 static int	setup_redirection(t_redir *redir)
 {
@@ -51,14 +23,14 @@ static int	setup_redirection(t_redir *redir)
 	else if (redir->type == REDIR_APPEND)
 		fd = open(redir->filename, O_WRONLY | O_CREAT | O_APPEND, 0644);
 	else
-		fd = handle_heredoc(redir->filename);
+		return (-1);
 	if (fd == -1)
 	{
 		write(STDERR_FILENO, "minishell: ", 11);
 		perror(redir->filename);
 		return (-1);
 	}
-	if (redir->type == REDIR_INPUT || redir->type == REDIR_HEREDOC)
+	if (redir->type == REDIR_INPUT)
 		dup2(fd, STDIN_FILENO);
 	else
 		dup2(fd, STDOUT_FILENO);

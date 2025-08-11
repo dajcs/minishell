@@ -6,7 +6,7 @@
 /*   By: anemet <anemet@student.42luxembourg.lu>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/04 18:59:00 by anemet            #+#    #+#             */
-/*   Updated: 2025/08/10 18:00:48 by anemet           ###   ########.fr       */
+/*   Updated: 2025/08/11 17:05:54 by anemet           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -187,18 +187,25 @@ int	execute(t_shell *shell_data)
 	cmd = shell_data->commands;
 	if (!cmd || !cmd->cmd_args || !cmd->cmd_args[0] || !cmd->cmd_args[0][0])
 		return (0);
+	if (process_heredocs(shell_data->commands) == -1)
+	{
+		shell_data->last_exit_status = 1;
+		return (1);
+	}
 	set_execution_signals();
 	if (!cmd->next && is_builtin(cmd->cmd_args[0]))
 	{
 		if (handle_redirections(cmd, &saved_stdin, &saved_stdout) == -1)
 		{
 			shell_data->last_exit_status = 1;
+			cleanup_heredocs(shell_data->commands);
 			return (1);
 		}
 		status = dispatch_builtin(cmd, shell_data);
 		restore_io(saved_stdin, saved_stdout);
 		shell_data->last_exit_status = status;
 		set_interactive_signals();
+		cleanup_heredocs(shell_data->commands);
 		return (status);
 	}
 	while (cmd)
@@ -251,5 +258,6 @@ int	execute(t_shell *shell_data)
 		else if (termsig == SIGQUIT)
 			printf("Quit (core dumped)\n");
 	}
+	cleanup_heredocs(shell_data->commands);
 	return (shell_data->last_exit_status);
 }

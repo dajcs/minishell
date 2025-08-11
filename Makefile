@@ -6,7 +6,7 @@
 #    By: anemet <anemet@student.42luxembourg.lu>    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/08/01 14:10:19 by anemet            #+#    #+#              #
-#    Updated: 2025/08/10 16:57:15 by anemet           ###   ########.fr        #
+#    Updated: 2025/08/11 16:03:49 by anemet           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -38,6 +38,7 @@ SRCS = src/main.c \
 	   src/execution/signals.c \
 	   src/execution/path_finder.c \
 	   src/execution/redirections.c \
+	   src/execution/redirections_utils.c \
 	   src/builtins/builtin_exit.c \
 	   src/builtins/builtin_pwd.c \
 	   src/builtins/builtin_echo.c \

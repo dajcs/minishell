@@ -6,7 +6,7 @@
 /*   By: anemet <anemet@student.42luxembourg.lu>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/01 14:25:53 by anemet            #+#    #+#             */
-/*   Updated: 2025/08/11 10:03:25 by anemet           ###   ########.fr       */
+/*   Updated: 2025/08/11 17:28:56 by anemet           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,9 +22,9 @@
 # include <readline/history.h>
 # include <readline/readline.h>
 # include <fcntl.h>				// open() and its flags
-# include <stdio.h>
-# include <stdlib.h>
-# include <unistd.h>
+# include <stdio.h>				// printf()
+# include <stdlib.h>			// malloc()
+# include <unistd.h>			// getpid()
 # include "libft.h"
 
 /* ----- Defines ----- */
@@ -43,10 +43,16 @@ typedef enum e_redir_type
 	REDIR_APPEND = 3
 }	t_redir_type;
 
-/* ----- Globals ----- */
-// extern volatile sig_atomic_t	g_signal_status;
-
 /* ----- Structures ----- */
+
+typedef struct s_fname
+{
+	char		*base;
+	char		*pid_str;
+	char		*count_str;
+	char		*temp;
+	char		*filename;
+}	t_fname;
 
 // t_redir a linked list of redirections for a command
 typedef struct s_redir
@@ -118,6 +124,10 @@ void			set_child_signals(void);
 void			restore_io(int saved_stdin, int saved_stdout);
 int				handle_redirections(t_command *cmd, int *saved_stdin,
 					int *saved_stdout);
+
+/* src/execution/redirections_utils.c */
+int				process_heredocs(t_command *commands);
+void			cleanup_heredocs(t_command *commands);
 
 /* ----- Built-in Functions (src/builtins) ----- */
 int				builtin_echo(char **args);
