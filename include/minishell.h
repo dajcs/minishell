@@ -6,7 +6,7 @@
 /*   By: anemet <anemet@student.42luxembourg.lu>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/01 14:25:53 by anemet            #+#    #+#             */
-/*   Updated: 2025/08/11 17:28:56 by anemet           ###   ########.fr       */
+/*   Updated: 2025/08/11 18:31:20 by anemet           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,6 +45,7 @@ typedef enum e_redir_type
 
 /* ----- Structures ----- */
 
+// t_fname because too many variables when assembling a temp filename
 typedef struct s_fname
 {
 	char		*base;
@@ -77,7 +78,7 @@ typedef struct s_shell
 	t_command	*commands;
 	char		**envp_list;			// our private modifiable env list
 	int			last_exit_status;
-	int			debug;					// used to print parsed commands
+	char		*debug;					// debug print tokens/commands/exit_st
 }	t_shell;
 
 /* ----- Function Prototypes ----- */
@@ -106,8 +107,11 @@ void			free_command_list(t_command *list_head);
 t_command		*handle_pipe(t_command *cmd, t_list **arg_list);
 void			free_command_list(t_command *list);
 
-/* src/parsing/env_utils.c */
-char			**duplicate_envp(char **envp);
+/* src/parsing/utils.c */
+void			print_tokens(char **tokens, char *token_type);
+void			print_command_list(t_command *cmd_list);
+void			pprint(t_shell *shell, char **raw, char **final,
+					int exit_status);
 
 /* src/execution/path_finder.c */
 char			*find_command_path(char *command, t_shell *shell);

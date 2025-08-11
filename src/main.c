@@ -6,62 +6,37 @@
 /*   By: anemet <anemet@student.42luxembourg.lu>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/01 14:34:51 by anemet            #+#    #+#             */
-/*   Updated: 2025/08/09 18:22:52 by anemet           ###   ########.fr       */
+/*   Updated: 2025/08/11 18:29:01 by anemet           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
-void	print_tokens(char **tokens, char *token_type)
+static char	**duplicate_envp(char **envp)
 {
-	int	i;
+	int		count;
+	char	**new_envp;
+	int		i;
 
-	printf("--- %s ---\n", token_type);
-	printf("---\n");
+	count = 0;
+	while (envp[count])
+		count++;
+	new_envp = malloc(sizeof(char *) * (count + 1));
+	if (!new_envp)
+		return (NULL);
 	i = 0;
-	while (tokens[i])
+	while (i < count)
 	{
-		printf("  [%d]: \"%s\"\n", i, tokens[i]);
+		new_envp[i] = ft_strdup(envp[i]);
+		if (!new_envp[i])
+		{
+			free_tokens(new_envp);
+			return (NULL);
+		}
 		i++;
 	}
-	printf("------------------------------\n\n");
-
-}
-
-// --- Helper function for testing ---
-void	print_command_list(t_command *cmd_list)
-{
-	int		i;
-	int		j;
-	t_redir	*redir;
-
-	i = 1;
-	while (cmd_list)
-	{
-		printf("--- cmd #%d ---\n", i++);
-		if (cmd_list->cmd_args)
-		{
-			printf("cmd_args: ");
-			j = 0;
-			while (cmd_list->cmd_args[j])
-			{
-				printf("[%s] ", cmd_list->cmd_args[j]);
-				j++;
-			}
-			printf("\n");
-		}
-		redir = cmd_list->redirections;
-		while (redir)
-		{
-			printf("redir   : TYPE=%d, FILENAME=%s\n", redir->type,
-				redir->filename);
-			redir = redir->next;
-		}
-		cmd_list = cmd_list->next;
-		if (cmd_list)
-			printf("            | (pipe)\n");
-	}
-	printf("\n----------------------------------------\n");
+	new_envp[i] = NULL;
+	return (new_envp);
 }
 
 /* free_loop_resources
@@ -127,15 +102,9 @@ void	shell_loop(t_shell *shell_data)
 				final_tokens = expand_and_clean(raw_tokens, shell_data);
 			if (final_tokens)
 				shell_data->commands = parse(final_tokens);
-			if (shell_data->debug)
-			{
-				print_tokens(raw_tokens, "raw_tokens");
-				print_tokens(final_tokens, "final_tokens");
-				print_command_list(shell_data->commands);
-			}
+			pprint(shell_data, raw_tokens, final_tokens, 0);
 			exit_status = execute(shell_data);
-			if (shell_data->debug)
-				printf("last_exit_status = %d\n", shell_data->last_exit_status);
+			pprint(shell_data, raw_tokens, final_tokens, 1);
 			if (exit_status >= EXIT_BUILTIN_CODE)
 			{
 				shell_data->last_exit_status = exit_status - EXIT_BUILTIN_CODE;
@@ -158,9 +127,9 @@ int	main(int argc, char **argv, char **envp)
 	t_shell	shell_data;
 
 	(void)argv;
-	shell_data.debug = 0;
+	shell_data.debug = NULL;
 	if (argc > 1)
-		shell_data.debug = 1;
+		shell_data.debug = argv[1];
 	shell_data.commands = NULL;
 	shell_data.last_exit_status = 0;
 	shell_data.envp_list = duplicate_envp(envp);
