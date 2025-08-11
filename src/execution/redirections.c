@@ -6,7 +6,7 @@
 /*   By: anemet <anemet@student.42luxembourg.lu>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/05 11:38:45 by anemet            #+#    #+#             */
-/*   Updated: 2025/08/10 09:40:41 by anemet           ###   ########.fr       */
+/*   Updated: 2025/08/11 09:51:48 by anemet           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -113,49 +113,3 @@ void	restore_io(int saved_stdin, int saved_stdout)
 		close(saved_stdout);
 	}
 }
-
-// /* handle_redirections()
-// 	Sets up all I/O redirections for a given command.
-// 	- If 'saved_stdin' or 'saved_stdout' are not NULL, saves the original FDs
-// 		This is needed for built-ins.
-// 	- For external commands in a child process we don't need save/restore,
-// 		so we can pass NULL.
-// */
-// int	handle_redirections(t_command *cmd, int *saved_stdin, int *saved_stdout)
-// {
-// 	t_redir	*redir;
-// 	int		fd;
-
-// 	if (saved_stdin)
-// 		*saved_stdin = dup(STDIN_FILENO);
-// 	if (saved_stdout)
-// 		*saved_stdout = dup(STDOUT_FILENO);
-// 	redir = cmd->redirections;
-// 	while (redir)
-// 	{
-// 		if (redir->type == REDIR_INPUT)
-// 			fd = open(redir->filename, O_RDONLY);
-// 		else if (redir->type == REDIR_OUTPUT)
-// 			fd = open(redir->filename, O_WRONLY | O_CREAT | O_TRUNC, 0644);
-// 		else if (redir->type == REDIR_APPEND)
-// 			fd = open(redir->filename, O_WRONLY | O_CREAT | O_APPEND, 0644);
-// 		else
-// 			fd = handle_heredoc(redir->filename);
-// 		if (fd == -1)
-// 		{
-// 			perror(redir->filename);
-// 			if (saved_stdin && *saved_stdin != -1)
-// 				restore_io(*saved_stdin, -1);
-// 			if (saved_stdout && *saved_stdout != -1)
-// 				restore_io(-1, *saved_stdout);
-// 			return (-1);
-// 		}
-// 		if (redir->type == REDIR_INPUT || redir->type == REDIR_HEREDOC)
-// 			dup2(fd, STDIN_FILENO);
-// 		else
-// 			dup2(fd, STDOUT_FILENO);
-// 		close(fd);
-// 		redir = redir->next;
-// 	}
-// 	return (0);
-// }

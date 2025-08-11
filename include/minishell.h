@@ -6,7 +6,7 @@
 /*   By: anemet <anemet@student.42luxembourg.lu>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/01 14:25:53 by anemet            #+#    #+#             */
-/*   Updated: 2025/08/10 18:01:14 by anemet           ###   ########.fr       */
+/*   Updated: 2025/08/11 10:03:25 by anemet           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,7 +48,7 @@ typedef enum e_redir_type
 
 /* ----- Structures ----- */
 
-// t_redir to represent a single redirection
+// t_redir a linked list of redirections for a command
 typedef struct s_redir
 {
 	t_redir_type	type;
@@ -59,7 +59,6 @@ typedef struct s_redir
 // t_command a linked list of commands with arguments and redirections
 typedef struct s_command
 {
-	// char				*command;		// the command itself (e.g., "ls")
 	char				**cmd_args;		/* full arguments array for execve
 											(e.g., {"ls", "-l", NULL}) */
 	t_redir				*redirections;	// A linked list of redirections
@@ -74,20 +73,6 @@ typedef struct s_shell
 	int			last_exit_status;
 	int			debug;					// used to print parsed commands
 }	t_shell;
-
-// t_expand members put in a struct because of 25 lines
-typedef struct s_expand
-{
-	int		alen;			// length of token after var
-	int		vlen;			// variable length
-	char	*dollar;		// pointer to $ char in a token
-	char	*var;			// var string
-	char	*var_val;		// var expanded to var_val string
-	char	*before_var;	// token string before the $ sign
-	char	*after_var;		// token string after the var
-	char	*tmp_token;		// tmp string: before_val + var_val
-	char	*new_token;		// new_token: before_val + var_val + after_var
-}	t_expand;
 
 /* ----- Function Prototypes ----- */
 

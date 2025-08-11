@@ -18,3 +18,4 @@ a.out
 removetests.sh
 minishell_tester
 tester
+.test/h.md
