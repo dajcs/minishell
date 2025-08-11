@@ -6,262 +6,123 @@
 /*   By: anemet <anemet@student.42luxembourg.lu>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/04 18:59:00 by anemet            #+#    #+#             */
-/*   Updated: 2025/08/11 21:15:20 by anemet           ###   ########.fr       */
+/*   Updated: 2025/08/12 00:09:13 by anemet           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
-static int	is_builtin(const char *command)
+/*	handle_single_builtin()
+	Executes a single built-in command, handling its redirections.
+	This allows built-ins like `cd` and `exit` to affect the parent shell.
+	It saves and restores standard I/O if redirections are present.
+	Return the exit status of the dispatched built-in command.
+ */
+static int	handle_single_builtin(t_shell *shell_data)
 {
-	if (!command)
-		return (0);
-	if (ft_strcmp(command, "echo") == 0)
-		return (1);
-	if (ft_strcmp(command, "cd") == 0)
-		return (1);
-	if (ft_strcmp(command, "pwd") == 0)
-		return (1);
-	if (ft_strcmp(command, "env") == 0)
-		return (1);
-	if (ft_strcmp(command, "unset") == 0)
-		return (1);
-	if (ft_strcmp(command, "export") == 0)
-		return (1);
-	if (ft_strcmp(command, "exit") == 0)
-		return (1);
-	return (0);
-}
+	int	saved_stdin;
+	int	saved_stdout;
+	int	status;
 
-/* dispatch_builtin()
-	- Checks if the command is a built-in and executes it if so
-		returns the built-in's exit code
-		(builtin_exit returns (256 + xcode) -> exit handled by shell_loop)
-	- Returns -1 if not built-in
-*/
-static int	dispatch_builtin(t_command *cmd, t_shell *shell_data)
-{
-	char	**args;
-
-	args = cmd->cmd_args;
-	if (args == NULL || args[0] == NULL)
-		return (-1);
-	if (ft_strcmp(args[0], "echo") == 0)
-		return (builtin_echo(args));
-	if (ft_strcmp(args[0], "cd") == 0)
-		return (builtin_cd(shell_data, args));
-	if (ft_strcmp(args[0], "pwd") == 0)
-		return (builtin_pwd(shell_data, args));
-	if (ft_strcmp(args[0], "env") == 0)
-		return (builtin_env(shell_data->envp_list));
-	if (ft_strcmp(args[0], "export") == 0)
-		return (builtin_export(shell_data, args));
-	if (ft_strcmp(args[0], "unset") == 0)
-		return (builtin_unset(shell_data, args));
-	if (ft_strcmp(args[0], "exit") == 0)
-		return (builtin_exit(args));
-	return (-1);
-}
-
-/* cmd_validation()
-	checks if command is a valid executable file
-	- struct stat path_stat - variable holds file metadata
-	- stat(path, &path_stat) - kernel fills out info about the file@path
-	- S_ISDIR(path_stat.st_mode) - returns 1 if directory -> exit(126)
-	- access(path, X_OK) - explicitly check for execute permission
-	- perror(path) -> // perror will print "Permission denied"
-*/
-void	cmd_validation(char *path)
-{
-	struct stat	path_stat;
-
-	if (stat(path, &path_stat) == 0)
-	{
-		if (S_ISDIR(path_stat.st_mode))
-		{
-			write(STDERR_FILENO, "minishell: ", 11);
-			write(STDERR_FILENO, path, ft_strlen(path));
-			write(STDERR_FILENO, ": Is a directory\n", 18);
-			free(path);
-			exit(126);
-		}
-	}
-	if (access(path, X_OK) != 0)
-	{
-		write(STDERR_FILENO, "minishell: ", 11);
-		perror(path);
-		free(path);
-		exit(126);
-	}
-}
-
-/*  execute_external_cmd()
-	Finds and runs an external command. This function does not return on success.
-	- Finds the command's full path.
-	- Performs checks for command existence and validity.
-	- Handles errors by printing to STDERR and exiting with the appropriate code.
-	- Calls execve() to replace the current process with the new command.
-	- If execve() returns, it's an error; prints it and exits.
-*/
-static void	execute_external_cmd(t_command *cmd, t_shell *shell_data)
-{
-	char	*path;
-
-	path = find_command_path(cmd->cmd_args[0], shell_data);
-	if (!path)
-	{
-		write(STDERR_FILENO, cmd->cmd_args[0], ft_strlen(cmd->cmd_args[0]));
-		write(STDERR_FILENO, ": command not found\n", 20);
-		exit(127);
-	}
-	if (access(path, F_OK) != 0)
-	{
-		write(STDERR_FILENO, "minishell: ", 11);
-		write(STDERR_FILENO, cmd->cmd_args[0], ft_strlen(cmd->cmd_args[0]));
-		write(STDERR_FILENO, ": No such file or directory\n", 28);
-		exit(127);
-	}
-	cmd_validation(path);
-	execve(path, cmd->cmd_args, shell_data->envp_list);
-	perror("execve");
-	free(path);
-	exit(EXIT_FAILURE);
-}
-
-/* run_command()
-	Runs a single command from within a forked child process.
-	- Handles I/O redirections for the command; exits if they fail.
-	- Checks if the command is a built-in. If so, it executes it and exits
-		with the built-in's status code.
-	- If it's not a built-in, it calls a helper function to handle
-		the execution of the external command.
-	- return (EXIT_FAILURE)  // This line is unreachable
-*/
-static int	run_command(t_command *cmd, t_shell *shell_data)
-{
-	int		status;
-
-	if (handle_redirections(cmd, NULL, NULL) == -1)
-		exit(EXIT_FAILURE);
-	if (is_builtin(cmd->cmd_args[0]))
-	{
-		status = dispatch_builtin(cmd, shell_data);
-		exit(status);
-	}
-	execute_external_cmd(cmd, shell_data);
-	return (EXIT_FAILURE);
-}
-
-/* execute()
-	The main executor.
-	It handles redirections and pipelines of any length
-	- process_heredocs() collects inputs for all cmd's heredocs
-	- set_execution_signals() -> parent to ignore signals Ctrl-\ and Ctrl-C
-	- special case: single built-in command (not in pipe)
-		this allows `cd`, `exit`, `export`, `unset`,... to modify parent shell
-		- set_interactive_signals(), clean heredocs and return last_exit_status
-	while(cmd) PIPELINE EXECUTION LOOP
-	- if(cmd->next) this isn't the last command: create a pipe
-	- fork()
-	--- CHILD PROCESS ---
-	- connect prev_pipe_read_end -> STDIN_FILENO
-	- if cmd->next connect new pipe write pipe_fds[1] -> STDOUT_FILENO
-	- run_command() -- should not return / or it will exit on failure
-	--- PARENT PROCESS ---
-	- close(prev_pipe_read_end) // Parent is done with the old pipe
-	- if(cmd->next)
-		- close new pipe write pipe_fds[1] // Parent doesn't write to new pipe
-		- prev_pipe_read_end = pipe_fds[0] //save new pipe read for next child
-	WAIT for ALL CHILDREN to FINISH
-	- while(wait(NULL) > 0) // ignore intermediate statuses
-	- waitpid(last_pid, &status, 0) // get the exit status of the LAST command
-	- set_interactive_signals()
-	- if "normal" exit (WIFEXITED): set last_exit_status
-	- else if terminated by signal (WIFSIGNALED)
-		- set last_exit_status
-		- if SIGINT (Ctrl-C) print new prompt
-		- else if SIGQUIT (Ctrl-\) print "Quit (core dumped)"
-	- return last_exit_status
-*/
-int	execute(t_shell *shell_data)
-{
-	t_command	*cmd;
-	int			pipe_fds[2];
-	int			prev_pipe_read_end;
-	int			saved_stdin;
-	int			saved_stdout;
-	pid_t		last_pid;
-	int			status;
-	int			final_status;
-	pid_t		exited_pid;
-	int			termsig;
-
-	prev_pipe_read_end = -1;
-	status = 0;
-	final_status = 0;
-	cmd = shell_data->commands;
-	if (!cmd || !cmd->cmd_args || !cmd->cmd_args[0] || !cmd->cmd_args[0][0])
-		return (0);
-	if (process_heredocs(shell_data->commands) == -1)
+	if (handle_redirections(shell_data->commands, &saved_stdin,
+			&saved_stdout) == -1)
 	{
 		shell_data->last_exit_status = 1;
 		return (1);
 	}
-	set_execution_signals();
-	if (!cmd->next && is_builtin(cmd->cmd_args[0]))
+	status = dispatch_builtin(shell_data->commands, shell_data);
+	restore_io(saved_stdin, saved_stdout);
+	shell_data->last_exit_status = status;
+	return (status);
+}
+
+/*	execute_child_process()
+	This is the entry point for the logic within a forked child process.
+	It sets up signals, connects the pipes for input and output, and
+	then executes the command. It does not return.
+	@param cmd The command to execute.
+	@param p_end The read end of the previous pipe (-1 if none).
+	@param fds The file descriptors for the new pipe if one exists.
+	@param data The main shell data structure.
+ */
+static void	execute_child_process(t_command *cmd, int p_end, int fds[2],
+		t_shell *data)
+{
+	set_child_signals();
+	if (p_end != -1)
 	{
-		if (handle_redirections(cmd, &saved_stdin, &saved_stdout) == -1)
-		{
-			shell_data->last_exit_status = 1;
-			cleanup_heredocs(shell_data->commands);
-			return (1);
-		}
-		status = dispatch_builtin(cmd, shell_data);
-		restore_io(saved_stdin, saved_stdout);
-		shell_data->last_exit_status = status;
-		set_interactive_signals();
-		cleanup_heredocs(shell_data->commands);
-		return (status);
+		dup2(p_end, STDIN_FILENO);
+		close(p_end);
 	}
-	while (cmd)
+	if (cmd->next)
 	{
-		if (cmd->next)
-			if (pipe(pipe_fds) == -1)
-				return (perror("pipe"), 1);
-		last_pid = fork();
-		if (last_pid == -1)
-			return (perror("fork"), 1);
-		if (last_pid == 0)
-		{
-			set_child_signals();
-			if (prev_pipe_read_end != -1)
-			{
-				dup2(prev_pipe_read_end, STDIN_FILENO);
-				close(prev_pipe_read_end);
-			}
-			if (cmd->next)
-			{
-				close(pipe_fds[0]);
-				dup2(pipe_fds[1], STDOUT_FILENO);
-				close(pipe_fds[1]);
-			}
-			run_command(cmd, shell_data);
-		}
-		if (prev_pipe_read_end != -1)
-			close(prev_pipe_read_end);
-		if (cmd->next)
-		{
-			close(pipe_fds[1]);
-			prev_pipe_read_end = pipe_fds[0];
-		}
-		cmd = cmd->next;
+		close(fds[0]);
+		dup2(fds[1], STDOUT_FILENO);
+		close(fds[1]);
 	}
-	while ((exited_pid = wait(&status)) > 0)
+	run_command(cmd, data);
+}
+
+/*	run_pipeline()
+	Iterates through the command list, creating a pipe and forking a child
+	process for each command in the pipeline.
+		t_pfc (pipe-fork-child) struct:
+	t_command	*cmd;
+	pid_t		pid;
+	int			pipe_fds[2];
+	Return the process ID (PID) of the last command in the pipeline.
+ */
+static pid_t	run_pipeline(t_shell *shell_data, int *prev_pipe_read_end)
+{
+	t_pfc	p;
+
+	p.cmd = shell_data->commands;
+	p.pid = -1;
+	while (p.cmd)
 	{
+		if (p.cmd->next)
+			if (pipe(p.pipe_fds) == -1)
+				return (perror("pipe"), -1);
+		p.pid = fork();
+		if (p.pid == -1)
+			return (perror("fork"), -1);
+		if (p.pid == 0)
+			execute_child_process(p.cmd, *prev_pipe_read_end, p.pipe_fds,
+				shell_data);
+		if (*prev_pipe_read_end != -1)
+			close(*prev_pipe_read_end);
+		if (p.cmd->next)
+		{
+			close(p.pipe_fds[1]);
+			*prev_pipe_read_end = p.pipe_fds[0];
+		}
+		p.cmd = p.cmd->next;
+	}
+	return (p.pid);
+}
+
+/*	wait_for_children()
+	Waits for all child processes created in the pipeline to terminate.
+	It then processes the exit status of the final command to set the
+	shell's last_exit_status correctly, handling signals appropriately.
+	last_pid: The PID of the last command's process.
+ */
+static void	wait_for_children(pid_t last_pid, t_shell *shell_data)
+{
+	int		status;
+	int		final_status;
+	pid_t	exited_pid;
+	int		termsig;
+
+	final_status = 0;
+	while (1)
+	{
+		exited_pid = wait(&status);
+		if (exited_pid <= 0)
+			break ;
 		if (exited_pid == last_pid)
 			final_status = status;
 	}
-	set_interactive_signals();
 	if (WIFEXITED(final_status))
 		shell_data->last_exit_status = WEXITSTATUS(final_status);
 	else if (WIFSIGNALED(final_status))
@@ -273,6 +134,38 @@ int	execute(t_shell *shell_data)
 		else if (termsig == SIGQUIT)
 			printf("Quit (core dumped)\n");
 	}
+}
+
+/* execute()
+	The main execution coordinator. It prepares for execution by processing
+	heredocs and then determines whether to run a single built-in command
+	or a full pipeline of one or more commands.
+	Return The last exit status of the command or pipeline.
+ */
+int	execute(t_shell *shell_data)
+{
+	int		status;
+	pid_t	last_pid;
+	int		prev_pipe_read_end;
+
+	if (!shell_data->commands || !shell_data->commands->cmd_args
+		|| !shell_data->commands->cmd_args[0])
+		return (0);
+	if (process_heredocs(shell_data->commands) == -1)
+		return (1);
+	set_execution_signals();
+	if (!shell_data->commands->next
+		&& is_builtin(shell_data->commands->cmd_args[0]))
+		status = handle_single_builtin(shell_data);
+	else
+	{
+		prev_pipe_read_end = -1;
+		last_pid = run_pipeline(shell_data, &prev_pipe_read_end);
+		if (last_pid != -1)
+			wait_for_children(last_pid, shell_data);
+		status = shell_data->last_exit_status;
+	}
+	set_interactive_signals();
 	cleanup_heredocs(shell_data->commands);
-	return (shell_data->last_exit_status);
+	return (status);
 }

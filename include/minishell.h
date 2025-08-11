@@ -6,7 +6,7 @@
 /*   By: anemet <anemet@student.42luxembourg.lu>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/01 14:25:53 by anemet            #+#    #+#             */
-/*   Updated: 2025/08/11 19:06:41 by anemet           ###   ########.fr       */
+/*   Updated: 2025/08/12 00:00:07 by anemet           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -72,6 +72,14 @@ typedef struct s_command
 	struct s_command	*next;			// Next command in the pipeline
 }	t_command;
 
+// t_pfc - (pipe-fork-child) - reducing nr of lines to 25 in `run_pipeline()`
+typedef struct s_pfc
+{
+	t_command	*cmd;
+	pid_t		pid;
+	int			pipe_fds[2];
+}	t_pfc;
+
 // t_shell holds the final command list
 typedef struct s_shell
 {
@@ -119,6 +127,11 @@ char			*find_command_path(char *command, t_shell *shell);
 
 /* src/execution/executor.c */
 int				execute(t_shell *shell_data);	// returns exit status
+
+/* src/execution/executor_utisl.c */
+int				is_builtin(const char *command);
+int				dispatch_builtin(t_command *cmd, t_shell *shell_data);
+int				run_command(t_command *cmd, t_shell *shell_data);
 
 /* src/execution/signals.c */
 void			set_interactive_signals(void);

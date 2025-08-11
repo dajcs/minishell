@@ -6,7 +6,7 @@
 #    By: anemet <anemet@student.42luxembourg.lu>    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/08/01 14:10:19 by anemet            #+#    #+#              #
-#    Updated: 2025/08/11 17:44:59 by anemet           ###   ########.fr        #
+#    Updated: 2025/08/11 23:45:03 by anemet           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -35,6 +35,7 @@ SRCS = src/main.c \
        src/parsing/expander.c \
        src/parsing/utils.c \
 	   src/execution/executor.c \
+	   src/execution/executor_utils.c \
 	   src/execution/signals.c \
 	   src/execution/path_finder.c \
 	   src/execution/redirections.c \
