@@ -3,6 +3,10 @@
 
 ---
 
+[Writing your own Shell](https://www.cs.purdue.edu/homes/grr/SystemsProgrammingBook/Book/Chapter5-WritingYourOwnShell.pdf)
+
+---
+
 Repo structure
 
 ```
@@ -20,6 +24,7 @@ minishell/
     ├── main.c
     │
     ├── parsing/
+    │   ├── utils.c
     │   ├── tokenizer.c
     │   ├── tokenizer_utils.c
     │   ├── parser.c
@@ -28,8 +33,10 @@ minishell/
     │
     ├── execution/
     │   ├── executor.c
+    │   ├── executor_utils.c
     │   ├── path_finder.c
     │   ├── redirections.c
+    │   ├── redirections_utils.c
     │   └── signals.c
     │
     └── builtins/
@@ -59,15 +66,31 @@ The "contract" between the two groups will be the data structure that represents
 A good way to represent commands is with a linked list of structures, where each structure represents a single command in a pipeline.
 
 ```c
+// t_redir a linked list of redirections for a command
+typedef struct s_redir
+{
+	t_redir_type	type;
+	char			*filename;	// The filename or delimiter
+	struct s_redir	*next;
+}	t_redir;
+
 // t_command a linked list of commands with arguments and redirections
 typedef struct s_command
 {
-	// char				*command;		// e.g., "grep"
 	char				**cmd_args;		/* full arguments array for execve
-											e.g., {"grep", "-i", "hello", NULL} */
+											(e.g., {"ls", "-l", NULL}) */
 	t_redir				*redirections;	// A linked list of redirections
 	struct s_command	*next;			// Next command in the pipeline
 }	t_command;
+
+// t_shell holds the final command list
+typedef struct s_shell
+{
+	t_command	*commands;
+	char		**envp_list;			// our private modifiable env list
+	int			last_exit_status;
+	char		*debug;					// flag to print tokens/commands/exit_status
+}	t_shell;
 ```
 ---
 

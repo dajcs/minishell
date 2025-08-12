@@ -6,7 +6,7 @@
 /*   By: anemet <anemet@student.42luxembourg.lu>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/01 14:25:53 by anemet            #+#    #+#             */
-/*   Updated: 2025/08/12 00:00:07 by anemet           ###   ########.fr       */
+/*   Updated: 2025/08/12 10:48:20 by anemet           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -86,7 +86,7 @@ typedef struct s_shell
 	t_command	*commands;
 	char		**envp_list;			// our private modifiable env list
 	int			last_exit_status;
-	char		*debug;					// debug print tokens/commands/exit_st
+	char		*debug;					// flag print tokens/commands/exit_stat
 }	t_shell;
 
 /* ----- Function Prototypes ----- */
