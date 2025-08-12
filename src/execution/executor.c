@@ -6,7 +6,7 @@
 /*   By: anemet <anemet@student.42luxembourg.lu>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/04 18:59:00 by anemet            #+#    #+#             */
-/*   Updated: 2025/08/12 00:09:13 by anemet           ###   ########.fr       */
+/*   Updated: 2025/08/12 16:43:25 by anemet           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -151,8 +151,13 @@ int	execute(t_shell *shell_data)
 	if (!shell_data->commands || !shell_data->commands->cmd_args
 		|| !shell_data->commands->cmd_args[0])
 		return (0);
-	if (process_heredocs(shell_data->commands) == -1)
-		return (1);
+	status = process_heredocs(shell_data->commands);
+	if (status)
+	{
+		cleanup_heredocs(shell_data->commands);
+		shell_data->last_exit_status = status;
+		return (status);
+	}
 	set_execution_signals();
 	if (!shell_data->commands->next
 		&& is_builtin(shell_data->commands->cmd_args[0]))
@@ -165,7 +170,6 @@ int	execute(t_shell *shell_data)
 			wait_for_children(last_pid, shell_data);
 		status = shell_data->last_exit_status;
 	}
-	set_interactive_signals();
 	cleanup_heredocs(shell_data->commands);
 	return (status);
 }

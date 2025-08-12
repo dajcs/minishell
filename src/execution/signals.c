@@ -6,13 +6,13 @@
 /*   By: anemet <anemet@student.42luxembourg.lu>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/05 18:12:59 by anemet            #+#    #+#             */
-/*   Updated: 2025/08/07 08:51:08 by anemet           ###   ########.fr       */
+/*   Updated: 2025/08/12 16:13:05 by anemet           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
-// volatile sig_atomic_t	g_signal_status = 0;
+volatile sig_atomic_t	g_heredoc_interrupted = 0;
 
 /* interactive_signal_handler()
 	Handling signals during the interactive phase (entering command at prompt)
@@ -81,4 +81,19 @@ void	set_child_signals(void)
 	sa.sa_handler = SIG_DFL;
 	sigaction(SIGINT, &sa, NULL);
 	sigaction(SIGQUIT, &sa, NULL);
+}
+
+/* heredoc_sigint_handler_pro()
+	A more advanced signal handler to make readline exit immediately
+	- ioctl() makes a device-specific I/O control request to FD
+		- TIOCSTI -> Terminal I/O Control, Simulate Type Input "\n" <enter>
+	- rl_on_new_line(), rl_replace_line() -> to have a clean new line
+*/
+void	heredoc_sigint_handler_pro(int sig)
+{
+	(void)sig;
+	g_heredoc_interrupted = 1;
+	ioctl(STDIN_FILENO, TIOCSTI, "\n");
+	rl_on_new_line();
+	rl_replace_line("", 0);
 }

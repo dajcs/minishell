@@ -6,7 +6,7 @@
 /*   By: anemet <anemet@student.42luxembourg.lu>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/01 14:25:53 by anemet            #+#    #+#             */
-/*   Updated: 2025/08/12 10:48:20 by anemet           ###   ########.fr       */
+/*   Updated: 2025/08/12 15:55:52 by anemet           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,13 +18,14 @@
 # include <signal.h>			// sig_atomic_t
 # include <sys/wait.h>			// waitpid
 # include <sys/stat.h>			// struct stat (path_stat)
+# include <sys/ioctl.h>			// for ioctl() and TIOCSTI
 # include <linux/limits.h>		// PATH_MAX 4096
 # include <readline/history.h>
 # include <readline/readline.h>
 # include <fcntl.h>				// open() and its flags
 # include <stdio.h>				// printf()
 # include <stdlib.h>			// malloc()
-# include <unistd.h>			// getpid()
+# include <unistd.h>			// getpid(), write()
 # include "libft.h"
 
 /* ----- Defines ----- */
@@ -42,6 +43,12 @@ typedef enum e_redir_type
 	REDIR_HEREDOC = 2,
 	REDIR_APPEND = 3
 }	t_redir_type;
+
+/* ----- Global Variables ----- */
+extern volatile sig_atomic_t	g_heredoc_interrupted;
+// volatile -> can change any time, compiler avoids optimizations here
+// sig_atomic_t -> "atomic" means that setting it can't be only partially
+//                                         completed when a signal arrives
 
 /* ----- Structures ----- */
 
@@ -137,6 +144,7 @@ int				run_command(t_command *cmd, t_shell *shell_data);
 void			set_interactive_signals(void);
 void			set_execution_signals(void);
 void			set_child_signals(void);
+void			heredoc_sigint_handler_pro(int sig);
 
 /* src/execution/redirections.c */
 void			restore_io(int saved_stdin, int saved_stdout);
