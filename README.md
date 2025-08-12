@@ -55,7 +55,7 @@ The bonus requirement sounds simple:
 - implement `&&` and `||` with parenthesis for priorities
 - wildcards `*` should work for the current working directory
 
-It should be decided from the beginning whether you want to do the bonus or not. This repo implements only the mandatory part. The main difference when implementing the bonus is that in the mandatory part it is enough to collect the parsed commands into a linked list. To implement the `&&` and `||` with parenthesis the command list should be put into an AST ([Abstract Syntax Tree](https://en.wikipedia.org/wiki/Abstract_syntax_tree)) structure.
+It should be decided from the beginning whether you want to do the bonus or not. This repo implements only the mandatory part. The main difference when implementing the bonus is that in the mandatory part it is enough to collect the parsed commands into a linked list. To implement the `&&` and `||` with parenthesis the command list should be put into an AST ([Abstract Syntax Tree](https://en.wikipedia.org/wiki/Abstract_syntax_tree)) structure. This is what it would take to implement bonus if you wouldn't considered it from the beginning: [late bonus](.test/bonus.md).
 
 Here is a detailed plan for dividing the Minishell project between two groups to allow for independent development and testing before integration:
 
