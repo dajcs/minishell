@@ -6,7 +6,7 @@
 /*   By: anemet <anemet@student.42luxembourg.lu>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/11 16:03:00 by anemet            #+#    #+#             */
-/*   Updated: 2025/08/12 16:46:39 by anemet           ###   ########.fr       */
+/*   Updated: 2025/08/24 14:43:35 by anemet           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -103,27 +103,20 @@ static int	process_one_heredoc(t_redir *redir)
 	return (res);
 }
 
-/* process_heredocs()
-	The main heredoc orchestrator. It sets up and restores signal handlers
-	- original_sigint_handler = signal() // get current handler
-	- signal(SIGINT, heredoc_sigint_handler_pro) // set our heredoc handler
-	- g_heredoc_interrupted = 0; // reset the flag before starting
-	WHILE(cmd)
-	- res = process_one_heredoc()
-	- if (res)  // +1 for fopen() error, +130 for Ctrl-C
-		restore original_sigint_handler, return res
-	After WHILE, restore original_sigint_handler, return 0
+/* iterate_cmds_process_hd()
+	Loops through each command and its list of redirections. When a heredoc
+	redirection is found, it calls process_one_heredoc to handle it.
+	Returns 0 if all heredocs are processed successfully. If any
+	heredoc processing fails or is interrupted (returns non-zero),
+	this function immediately returns the corresponding status code.
+	non-zero status codes: 1 - fopen() error, 130 - SIGINT (Ctrl-C)
 */
-int	process_heredocs(t_command *commands)
+static int	iterate_cmds_process_hd(t_command *commands)
 {
 	t_command	*cmd;
 	t_redir		*redir;
-	void		(*original_sigint_handler)(int);
 	int			res;
 
-	original_sigint_handler = signal(SIGINT, SIG_DFL);
-	signal(SIGINT, heredoc_sigint_handler_pro);
-	g_heredoc_interrupted = 0;
 	cmd = commands;
 	while (cmd)
 	{
@@ -134,17 +127,39 @@ int	process_heredocs(t_command *commands)
 			{
 				res = process_one_heredoc(redir);
 				if (res)
-				{
-					signal(SIGINT, original_sigint_handler);
 					return (res);
-				}
 			}
 			redir = redir->next;
 		}
 		cmd = cmd->next;
 	}
-	signal(SIGINT, original_sigint_handler);
 	return (0);
+}
+
+/* process_heredocs()
+	The main heredoc orchestrator. It sets up the signal handling for the
+	heredoc interactive phase, calls a helper to process all heredocs, and
+	then safely restores the original signal handler.
+	Setting up and restoring signal handlers:
+	- original_sigint_handler = signal() // get current handler
+	- signal(SIGINT, heredoc_sigint_handler_pro) // set our heredoc handler
+	- g_heredoc_interrupted = 0; // reset the flag before starting
+	- res = ... // 0: success, 1: fopen error, 130: Ctrl-C
+	- signal(SIGINT, original_sigint_handler) // restore orig sigint handler
+	Returns 0 on success, or a non-zero status code if any
+	heredoc processing fails or is interrupted by Ctrl-C.
+*/
+int	process_heredocs(t_command *commands)
+{
+	void	(*original_sigint_handler)(int);
+	int		res;
+
+	original_sigint_handler = signal(SIGINT, SIG_DFL);
+	signal(SIGINT, heredoc_sigint_handler_pro);
+	g_heredoc_interrupted = 0;
+	res = iterate_cmds_process_hd(commands);
+	signal(SIGINT, original_sigint_handler);
+	return (res);
 }
 
 void	cleanup_heredocs(t_command *commands)
