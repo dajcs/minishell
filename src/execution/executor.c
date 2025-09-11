@@ -6,35 +6,11 @@
 /*   By: anemet <anemet@student.42luxembourg.lu>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/04 18:59:00 by anemet            #+#    #+#             */
-/*   Updated: 2025/09/11 10:52:55 by anemet           ###   ########.fr       */
+/*   Updated: 2025/09/11 16:37:16 by anemet           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
-
-/*	handle_single_builtin()
-	Executes a single built-in command, handling its redirections.
-	This allows built-ins like `cd` and `exit` to affect the parent shell.
-	It saves and restores standard I/O if redirections are present.
-	Return the exit status of the dispatched built-in command.
- */
-static int	handle_single_builtin(t_shell *shell_data)
-{
-	int	saved_stdin;
-	int	saved_stdout;
-	int	status;
-
-	if (handle_redirections(shell_data->commands, &saved_stdin,
-			&saved_stdout) == -1)
-	{
-		shell_data->last_exit_status = 1;
-		return (1);
-	}
-	status = dispatch_builtin(shell_data->commands, shell_data);
-	restore_io(saved_stdin, saved_stdout);
-	shell_data->last_exit_status = status;
-	return (status);
-}
 
 /*	execute_child_process()
 	This is the entry point for the logic within a forked child process.

@@ -6,7 +6,7 @@
 /*   By: anemet <anemet@student.42luxembourg.lu>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/11 16:03:00 by anemet            #+#    #+#             */
-/*   Updated: 2025/08/24 14:43:35 by anemet           ###   ########.fr       */
+/*   Updated: 2025/09/11 16:39:13 by anemet           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -160,24 +160,4 @@ int	process_heredocs(t_command *commands)
 	res = iterate_cmds_process_hd(commands);
 	signal(SIGINT, original_sigint_handler);
 	return (res);
-}
-
-void	cleanup_heredocs(t_command *commands)
-{
-	t_command	*cmd;
-	t_redir		*redir;
-
-	cmd = commands;
-	while (cmd)
-	{
-		redir = cmd->redirections;
-		while (redir)
-		{
-			if (redir->filename && ft_strncmp(redir->filename,
-					"/tmp/minishell_heredoc_", 23) == 0)
-				unlink(redir->filename);
-			redir = redir->next;
-		}
-		cmd = cmd->next;
-	}
 }
