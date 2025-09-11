@@ -6,7 +6,7 @@
 /*   By: anemet <anemet@student.42luxembourg.lu>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/01 14:25:53 by anemet            #+#    #+#             */
-/*   Updated: 2025/09/11 16:43:09 by anemet           ###   ########.fr       */
+/*   Updated: 2025/09/11 16:50:29 by anemet           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -156,7 +156,7 @@ int				process_heredocs(t_command *commands);
 
 /* src/execution/utils2.c */
 void			cleanup_heredocs(t_command *commands);
-static int		handle_single_builtin(t_shell *shell_data);
+int				handle_single_builtin(t_shell *shell_data);
 
 /* ----- Built-in Functions (src/builtins) ----- */
 int				builtin_echo(char **args);

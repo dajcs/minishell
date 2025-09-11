@@ -6,7 +6,7 @@
 /*   By: anemet <anemet@student.42luxembourg.lu>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/11 16:37:01 by anemet            #+#    #+#             */
-/*   Updated: 2025/09/11 16:39:19 by anemet           ###   ########.fr       */
+/*   Updated: 2025/09/11 16:50:14 by anemet           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,7 +18,7 @@
 	It saves and restores standard I/O if redirections are present.
 	Return the exit status of the dispatched built-in command.
  */
-static int	handle_single_builtin(t_shell *shell_data)
+int	handle_single_builtin(t_shell *shell_data)
 {
 	int	saved_stdin;
 	int	saved_stdout;
