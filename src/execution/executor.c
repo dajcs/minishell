@@ -6,7 +6,7 @@
 /*   By: anemet <anemet@student.42luxembourg.lu>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/04 18:59:00 by anemet            #+#    #+#             */
-/*   Updated: 2025/08/24 11:31:08 by anemet           ###   ########.fr       */
+/*   Updated: 2025/09/11 10:52:55 by anemet           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -136,53 +136,12 @@ static void	wait_for_children(pid_t last_pid, t_shell *shell_data)
 	}
 }
 
-/* execute()
-	The main execution coordinator. It prepares for execution by processing
-	heredocs and then determines whether to run a single built-in command
-	or a full pipeline of one or more commands.
-	Return The last exit status of the command or pipeline.
- */
-// int	execute(t_shell *shell_data)
-// {
-// 	int		status;
-// 	pid_t	last_pid;
-// 	int		prev_pipe_read_end;
-
-// 	if (!shell_data->commands || !shell_data->commands->cmd_args
-// 		|| !shell_data->commands->cmd_args[0])
-// 		return (0);
-// 	status = process_heredocs(shell_data->commands);
-// 	if (status)
-// 	{
-// 		cleanup_heredocs(shell_data->commands);
-// 		shell_data->last_exit_status = status;
-// 		return (status);
-// 	}
-// 	set_execution_signals();
-// 	if (!shell_data->commands->next
-// 		&& is_builtin(shell_data->commands->cmd_args[0]))
-// 		status = handle_single_builtin(shell_data);
-// 	else
-// 	{
-// 		prev_pipe_read_end = -1;
-// 		last_pid = run_pipeline(shell_data, &prev_pipe_read_end);
-// 		if (last_pid != -1)
-// 			wait_for_children(last_pid, shell_data);
-// 		status = shell_data->last_exit_status;
-// 	}
-// 	cleanup_heredocs(shell_data->commands);
-// 	return (status);
-// }
-
-/*
-* execute_pipeline()
-*
-* Handles the execution of a command pipeline. It initializes the pipe
-* tracking, runs the pipeline, waits for all child processes to complete,
-* and returns the exit status of the last command.
-*
-* @param shell_data The main shell data structure.
-* @return The final exit status from the pipeline.
+/* execute_pipeline()
+	Handles the execution of a command pipeline.
+	- It initializes the pipe tracking
+	- runs the pipeline
+	- and waits for all child processes to complete
+	Returns the exit status of the last command.
 */
 static int	execute_pipeline(t_shell *shell_data)
 {
@@ -196,15 +155,12 @@ static int	execute_pipeline(t_shell *shell_data)
 	return (shell_data->last_exit_status);
 }
 
-/*
-* execute()
-*
-* The main execution coordinator. It prepares for execution by processing
-* heredocs and then determines whether to run a single built-in command
-* or a full pipeline of one or more commands.
-*
-* @param shell_data The main shell data structure.
-* @return The last exit status of the command or pipeline.
+/* execute()
+	The main execution coordinator.
+	- It prepares for execution by processing heredocs and determines whether:
+		- run a single built-in command
+		- or run a full pipeline of one or more commands
+	Return the last exit status of the command or pipeline.
 */
 int	execute(t_shell *shell_data)
 {

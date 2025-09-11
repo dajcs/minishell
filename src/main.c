@@ -6,7 +6,7 @@
 /*   By: anemet <anemet@student.42luxembourg.lu>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/01 14:34:51 by anemet            #+#    #+#             */
-/*   Updated: 2025/08/11 18:55:44 by anemet           ###   ########.fr       */
+/*   Updated: 2025/09/11 10:40:21 by anemet           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -128,6 +128,11 @@ void	shell_loop(t_shell *shell_data)
 }
 
 /* main
+	- minishell can be started with "rfcx" debug string argument:
+		- r: print raw tokens
+		- f: print final tokens
+		- c: print parsed command
+		- x: print exit status
 	- shell_data.envp_list = duplicate_envp()
 	- passing shell_data with our own envp to shell_loop
 */
@@ -135,10 +140,10 @@ int	main(int argc, char **argv, char **envp)
 {
 	t_shell	shell_data;
 
-	(void)argv;
-	shell_data.debug = NULL;
 	if (argc > 1)
 		shell_data.debug = argv[1];
+	else
+		shell_data.debug = NULL;
 	shell_data.commands = NULL;
 	shell_data.last_exit_status = 0;
 	shell_data.envp_list = duplicate_envp(envp);
