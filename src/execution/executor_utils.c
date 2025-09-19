@@ -6,7 +6,7 @@
 /*   By: anemet <anemet@student.42luxembourg.lu>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/11 23:44:42 by anemet            #+#    #+#             */
-/*   Updated: 2025/08/11 23:59:47 by anemet           ###   ########.fr       */
+/*   Updated: 2025/09/18 14:09:47 by anemet           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -81,7 +81,7 @@ static void	cmd_validation(char *path)
 		{
 			write(STDERR_FILENO, "minishell: ", 11);
 			write(STDERR_FILENO, path, ft_strlen(path));
-			write(STDERR_FILENO, ": Is a directory\n", 18);
+			write(STDERR_FILENO, ": Is a directory\n", 17);
 			free(path);
 			exit(126);
 		}
